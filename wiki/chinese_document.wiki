@@ -1,0 +1,16 @@
+#labels tcp,netlink,rawsockets,membase,memcached,onlinetesting
+{{{
+
+tcpcopy开源了，这个工具非常具备实用性，
+我们曾经应用于网易的广告投放系统，避免了上线带来的很多问题。
+tcpcopy主要由三大功能：
+1）分布式压力测试工具，可以测试系统到底能够承受多大压力，测试数据都是在线数据
+2）对于后端的短连接，由于丢失率非常低(1/10万)，可以应用于热备份
+3）普通上线测试，可以发现新系统是否稳定,是否崩溃等问题
+
+
+我们即将应用tcpcopy于membase系统，原先我们有mecached系统，但由于membase还不够成熟，不敢直接上线，利用tcpcopy程序，就可以把访问memcached的系统流量复制一份到membase系统中去，对于membase来说，这份流量就是访问membase的，跟直接上线membase效果一样，就可以做各种试验，查看membase的各种特性
+
+
+
+}}}
