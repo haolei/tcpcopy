@@ -16,7 +16,7 @@ static void set_sock_no_delay(int sock){
 	}
 }
 
-static void formatOutput(struct iphdr *ip_header)
+/*static void formatOutput(struct iphdr *ip_header)
 {
 	struct in_addr srcaddr;
 	struct in_addr destaddr;
@@ -40,7 +40,7 @@ static void formatOutput(struct iphdr *ip_header)
 				sbuf,ntohs(tcp_header->source),dbuf,ntohs(tcp_header->dest),packSize,seq,ack_seq);
 	}
 
-}
+}*/
 
 
 static int seq =0;
@@ -84,7 +84,7 @@ static void interception_process(int fd){
 		status_update(ip_header);
 		recvFromTest++;
 		{
-			formatOutput(ip_header);
+			//formatOutput(ip_header);
 		}
 		//drop the packet
 		drop_netlink_packet(packet_id);  	
