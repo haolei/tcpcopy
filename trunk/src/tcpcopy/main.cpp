@@ -363,14 +363,15 @@ int main(int argc ,char **argv)
 	bool result=true;
 	if(argc != 5)
 	{
-		printf("Usage: %s 61.135.250.201||61.135.250.202 80 61.135.250.217 80\n\n",argv[0]);
+		printf("Usage: %s 61.135.250.201||61.135.250.202 80 61.135.250.217 80\n\n",
+				argv[0]);
 		exit(1);
 	}
 	company_ip=inet_addr("61.135.250.217");
 	result=retrieveVirtualIPAddress(argv[1]);
 	if(!result)
 	{
-		printf("local ip address is not valid,it must not be 127.0.0.1 or domain name");
+		printf("it does not support local ip addr or domain name");
 	}
 	local_port = htons(atoi(argv[2]));
 	remote_ip = inet_addr(argv[3]);
