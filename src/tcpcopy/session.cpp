@@ -827,7 +827,7 @@ void session_st::process_recv(struct iphdr *ip_header,struct tcphdr *tcp_header)
 						lostPackets.push_back(copy_ip_packet(ip_header));
 						if(chosenOutput)
 						{
-							logInfo("TCP Previous segment lost and need waiting previous packet");
+							logInfo("packets lost and need waiting previous packet");
 						}
 						isWaitPreviousPacket=true;
 						return;
