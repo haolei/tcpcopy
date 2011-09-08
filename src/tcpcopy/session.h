@@ -87,12 +87,14 @@ struct session_st
 	bool 	isTrueWaitResponse;
 	bool 	isWaitPreviousPacket;
 	bool 	isSegContinue;
+	bool 	isKeepalive;
 	bool 	confirmed;
 	bool 	chosenOutput;
 	bool 	isTestConnClosed;
 	bool 	isFakedSendingFinToBackend;
 	bool 	isSynIntercepted;
 	bool 	isHalfWayIntercepted;
+	bool 	isStatClosed;
 
 	uint32_t lastAck;
 	uint32_t lastReqContSeq;
@@ -100,7 +102,7 @@ struct session_st
 	dataContainer unsend;
 	dataContainer lostPackets;
 	dataContainer handshakePackets;
-
+	size_t requestProcessed;
 	time_t lastUpdateTime;
 	time_t createTime;
 
@@ -153,11 +155,13 @@ struct session_st
 		isTestConnClosed=false;
 		isSynIntercepted=false;
 		isHalfWayIntercepted=false;
+		isStatClosed=false;
 		virtual_status = SYN_SEND;
 		reset_flag = false;
 		isWaitPreviousPacket=false;
 		isWaitBakendClosed=false;
 		isClientClosed=false;
+		isKeepalive=false;
 		isWaitResponse=false;
 		isTrueWaitResponse=false;
 		isSegContinue=false;
@@ -166,6 +170,7 @@ struct session_st
 		lastReqContSeq=0;
 		nextSeq=0;
 		lastAck=0;
+		requestProcessed=0;
 		lastUpdateTime=time(0);
 		createTime=time(0);
 

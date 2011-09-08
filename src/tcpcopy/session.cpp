@@ -54,9 +54,10 @@ static int totalContentPackets=0;
 static int totalPackets=0;
 static int totalSynPackets=0;
 static int totalSendPackets=0;
-static int totalRequests=0;
 static int totalResponse=0;
 static int invalidPacketsFromClient=0; 
+
+static uint64_t totalRequests=0;
 
 /**
  * clear timeout tcp sessions
@@ -65,13 +66,32 @@ static int clearTimeoutTcpSessions()
 {
 	//we clear old sessions every one minute 
 	//this may be a problem for keepalive connections
-	time_t base=time(0)-60;
+	time_t normalBase=time(0)-60;
+	time_t keepaliveBase=time(0)-3600;
+	time_t tmpBase=0;
+	double ratio=100.0*enterCount/(totalRequests+1);
+	if(ratio<10)
+	{
+		normalBase=keepaliveBase;
+	}
 	for(SessIterator p=sessions.begin();p!=sessions.end();)
 	{
-		if(p->second.lastUpdateTime<base)
+		if(p->second.isKeepalive)
+		{
+			tmpBase=keepaliveBase;
+		}else
+		{
+			tmpBase=normalBase;
+		}
+
+		if(p->second.lastUpdateTime<tmpBase)
 		{
 			deleteObsoCount++;
-			activeCount--;
+			if(!p->second.isStatClosed)
+			{
+				p->second.isStatClosed=true;
+				activeCount--;
+			}
 			sessions.erase(p++);
 		}else
 		{
@@ -614,6 +634,7 @@ void session_st::establishConnectionForNoSynPackets(struct iphdr *ip_header,
 		isSynIntercepted=true;
 		totalSendPackets++;
 	}
+	activeCount++;
 
 }
 /**
@@ -863,6 +884,11 @@ void session_st::process_recv(struct iphdr *ip_header,struct tcphdr *tcp_header)
 					return;
 				}else
 				{
+					requestProcessed++;
+					if(requestProcessed>30)
+					{
+						isKeepalive=true;
+					}
 					if(chosenOutput)
 					{
 						logInfo("a new request from client");
@@ -1042,7 +1068,11 @@ void process(char *packet)
 			iter->second.update_virtual_status(ip_header,tcp_header);
 			if( iter->second.is_over())
 			{
-				activeCount--;
+				if(!iter->second.isStatClosed)
+				{
+					iter->second.isStatClosed=true;
+					activeCount--;
+				}
 				leaveCount++;
 				sessions.erase(iter);
 			}
@@ -1120,7 +1150,12 @@ void process(char *packet)
 				iter->second.lastUpdateTime=time(0);
 				if( (iter->second.is_over()))
 				{
-					activeCount--;
+					if(!iter->second.isStatClosed)
+					{
+						iter->second.isStatClosed=true;
+						activeCount--;
+					}
+
 					leaveCount++;
 					sessions.erase(iter);
 				}
@@ -1136,7 +1171,7 @@ void process(char *packet)
 				{
 					invalidPacketsFromClient++;
 
-					if(invalidPacketsFromClient>10000)
+					if(invalidPacketsFromClient>1000)
 					{
 						logInfo("this is a lost packet with no syn");
 						outputPacketForDebug(CLIENT_FLAG,ip_header,tcp_header);
