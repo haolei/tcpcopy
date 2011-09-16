@@ -90,7 +90,6 @@ struct session_st
 	int generateRandomNumber(int min,int max,unsigned int* seed)                                                                        
 	{
 		int randNum=(int)(max*(rand_r(seed)/(RAND_MAX+1.0)))+min;
-		assert(randNum>=min&&randNum<=max);
 		return randNum;
 	}
 
