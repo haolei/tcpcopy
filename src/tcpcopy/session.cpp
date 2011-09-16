@@ -86,7 +86,7 @@ static int clearTimeoutTcpSessions()
 void outputPacketForDebug(int level,int flag,struct iphdr *ip_header,
 		struct tcphdr *tcp_header)
 {
-	if(output_level >= level)
+	if(output_level < level)
 	{
 		return;
 	}
