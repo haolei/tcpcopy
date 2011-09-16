@@ -637,6 +637,12 @@ void session_st::establishConnectionForNoSynPackets(struct iphdr *ip_header,
 	}
 	{
 		int sock=address_find_sock(tcp_header->dest);
+		if(-1 == sock)
+		{
+			logInfo(LOG_WARN,"sock is invalid in est Conn for NoSynPackets");
+			outputPacketForDebug(LOG_WARN,CLIENT_FLAG,ip_header,tcp_header);
+			return;
+		}
 		int result=msg_copyer_send(sock,ip_header->saddr,
 				tcp_header->source,CLIENT_ADD);
 		if(-1 == result)
@@ -673,7 +679,13 @@ void session_st::establishConnectionForClosedConn()
 		size_t size_ip = ip_header->ihl<<2;
 		struct tcphdr *tcp_header = (struct tcphdr*)((char *)ip_header+size_ip);
 		int sock=address_find_sock(tcp_header->dest);
-		if(0==fake_ip_addr)
+		if(-1 == sock)
+		{
+			logInfo(LOG_WARN,"sock is invalid in establishConnForClosedConn");
+			outputPacketForDebug(LOG_WARN,CLIENT_FLAG,ip_header,tcp_header);
+			return;
+		}
+		if(0 == fake_ip_addr)
 		{
 			client_ip_addr=ip_header->saddr;
 		}else
@@ -1149,6 +1161,12 @@ void process(char *packet)
 				logInfo(LOG_WARN,"reuse port number,key :%llu",value);
 			}
 			int sock=address_find_sock(tcp_header->dest);
+			if(-1 == sock)
+			{
+				logInfo(LOG_WARN,"sock is invalid in process");
+				outputPacketForDebug(LOG_WARN,CLIENT_FLAG,ip_header,tcp_header);
+				return;
+			}
 			int result=msg_copyer_send(sock,ip_header->saddr,
 					tcp_header->source,CLIENT_ADD);
 			if(-1 == result)
