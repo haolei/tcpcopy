@@ -453,13 +453,15 @@ void session_st::sendFakedSynAckToBackend(struct iphdr* ip_header,
 	ip_header2->daddr = ip_header->saddr;
 	tcp_header2->doff= 5;
 	tcp_header2->source = tcp_header->dest;
-	tcp_header2->dest= tcp_header->source;
+	tcp_header2->dest= local_port;
 	tcp_header2->ack=1;
 	tcp_header2->ack_seq = virtual_next_sequence;
 	tcp_header2->seq = tcp_header->ack_seq;
 	tcp_header2->window= 65535;
 	logInfo(LOG_INFO,"send faked syn ack to backend,client window:%u",
 			tcp_header2->window);
+	unsigned char *data=copy_ip_packet(ip_header2);
+	handshakePackets.push_back(data);
 	send_ip_packet(chosenOutput,fake_ip_addr,fake_ack_buf,
 			virtual_next_sequence,&nextSeq);
 	totalSendPackets++;
