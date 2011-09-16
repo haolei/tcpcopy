@@ -422,7 +422,7 @@ void session_st::sendFakedSynToBackend(struct iphdr* ip_header,
 	tcp_header2->dest= tcp_header->dest;
 	tcp_header2->syn=1;
 	tcp_header2->seq = minus_1(tcp_header->seq);
-	client_window=65534;
+	client_window=65535;
 	tcp_header2->window= client_window;
 	virtual_next_sequence=tcp_header->seq;
 	unsigned char *data=copy_ip_packet(ip_header2);
@@ -452,17 +452,18 @@ void session_st::sendFakedSynAckToBackend(struct iphdr* ip_header,
 	ip_header2->ttl = 64; 
 	ip_header2->protocol = 6;
 	ip_header2->id= htons(client_ip_id+2);;
-	ip_header2->saddr = local_dest_ip_addr;
-	ip_header2->daddr = ip_header->saddr;
+	ip_header2->saddr = fake_ip_addr;
+	ip_header2->daddr = local_dest_ip_addr; 
 	tcp_header2->doff= 5;
 	tcp_header2->source = tcp_header->dest;
 	tcp_header2->dest= local_port;
 	tcp_header2->ack=1;
 	tcp_header2->ack_seq = virtual_next_sequence;
 	tcp_header2->seq = tcp_header->ack_seq;
-	tcp_header2->window= 65533;
+	tcp_header2->window= 65535;
 	unsigned char *data=copy_ip_packet(ip_header2);
 	handshakePackets.push_back(data);
+	outputPacketForDebug(LOG_NOTICE,BACKEND_FLAG,ip_header,tcp_header);
 	outputPacketForDebug(LOG_NOTICE,CLIENT_FLAG,ip_header2,tcp_header2);
 	send_ip_packet(chosenOutput,fake_ip_addr,fake_ack_buf,
 			virtual_next_sequence,&nextSeq);
