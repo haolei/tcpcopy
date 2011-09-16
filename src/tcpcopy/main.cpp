@@ -131,7 +131,6 @@ static void set_nonblock(int socket)
 {
 	int flags;
 	flags = fcntl(socket,F_GETFL,0);
-	assert(flags != -1);
 	fcntl(socket, F_SETFL, flags | O_NONBLOCK);
 }
 
@@ -304,7 +303,6 @@ static int retrieveVirtualIPAddress(const char* ips)
 		{
 			len=strlen(p);
 		}
-		assert(len<32);
 		strncpy(tmp,p,len);
 		inetAddr=inet_addr(tmp);	
 		if(inetAddr==localhost)
