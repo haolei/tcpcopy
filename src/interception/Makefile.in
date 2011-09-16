@@ -55,7 +55,7 @@ am_interception_OBJECTS = status.$(OBJEXT) delay.$(OBJEXT) \
 	hash.$(OBJEXT) interception.$(OBJEXT) linklist.$(OBJEXT) \
 	nl_firewall.$(OBJEXT) nl.$(OBJEXT) main.$(OBJEXT)
 interception_OBJECTS = $(am_interception_OBJECTS)
-interception_DEPENDENCIES = ../event/libevent.a \
+interception_DEPENDENCIES = ../event/libevent.a ../log/liblog.a \
 	../communication/libmsg.a
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -182,6 +182,7 @@ interception_SOURCES = \
 
 interception_LDADD = \
 				   ../event/libevent.a\
+				   ../log/liblog.a\
 				   ../communication/libmsg.a
 
 all: all-am
