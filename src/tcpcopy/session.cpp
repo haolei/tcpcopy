@@ -625,6 +625,12 @@ unsigned char * session_st::copy_ip_packet(struct iphdr *ip_header)
 	if(data)
 	{
 		memcpy(data,ip_header,tot_len);
+		size_t size_ip = ip_header->ihl<<2;
+		struct tcphdr *tcp_header = (struct tcphdr*)((char *)ip_header+size_ip);
+		if(tcp_header->dest==remote_port)
+		{
+			logInfo(LOG_ERR,"dest is wrong");
+		}
 	}
 	return data;
 }
