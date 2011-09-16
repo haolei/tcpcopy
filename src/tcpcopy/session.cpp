@@ -51,7 +51,7 @@ static int clearTimeoutTcpSessions()
 	if(ratio<10)
 	{
 		normalBase=keepaliveBase;
-		logInfo(LOG_DEBUG,"keepalive connection global");
+		logInfo(LOG_NOTICE,"keepalive connection global");
 	}
 	for(SessIterator p=sessions.begin();p!=sessions.end();)
 	{
