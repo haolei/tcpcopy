@@ -270,6 +270,8 @@ static int init_tcp_copy()
 
 		//add a connection to the tested server for exchanging infomation
 		add_msg_connetion(local_port,remote_ip,remote_port);
+		logInfo(LOG_NOTICE,"add a tunnel for exchanging information:%u",
+				ntohs(remote_port));
 
 		return SUCCESS;
 	}else
