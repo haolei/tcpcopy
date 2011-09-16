@@ -57,6 +57,7 @@ struct session_st
 	uint32_t virtual_ack;
 	uint32_t fake_ip_addr;
 	uint32_t client_ip_addr;
+	uint32_t local_dest_ip_addr;
 	uint16_t virtual_status;
 	uint16_t client_window;
 	uint16_t client_ip_id;

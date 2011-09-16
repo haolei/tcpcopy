@@ -406,6 +406,8 @@ void session_st::sendFakedSynToBackend(struct iphdr* ip_header,
 	struct iphdr *ip_header2 = (struct iphdr *)fake_syn_buf;
 	struct tcphdr *tcp_header2 = (struct tcphdr *)(fake_syn_buf+20);
 
+	logInfo(LOG_NOTICE,"sendFakedSynToBackend");
+	outputPacketForDebug(LOG_NOTICE,CLIENT_FLAG,ip_header,tcp_header);
 	ip_header2->version = 4;
 	ip_header2->ihl = 5;
 	ip_header2->tot_len = htons(FAKE_SYN_BUF_SIZE);
@@ -420,12 +422,13 @@ void session_st::sendFakedSynToBackend(struct iphdr* ip_header,
 	tcp_header2->dest= tcp_header->dest;
 	tcp_header2->syn=1;
 	tcp_header2->seq = minus_1(tcp_header->seq);
-	client_window=65535;
+	client_window=65534;
 	tcp_header2->window= client_window;
 	virtual_next_sequence=tcp_header->seq;
 	unsigned char *data=copy_ip_packet(ip_header2);
 	handshakePackets.push_back(data);
-	logInfo(LOG_INFO,"send faked syn to backend,client window:%u",
+	outputPacketForDebug(LOG_NOTICE,CLIENT_FLAG,ip_header2,tcp_header2);
+	logInfo(LOG_DEBUG,"send faked syn to backend,client window:%u",
 			tcp_header2->window);
 	send_ip_packet(true,fake_ip_addr,fake_syn_buf,
 			virtual_next_sequence,&nextSeq);
@@ -449,7 +452,7 @@ void session_st::sendFakedSynAckToBackend(struct iphdr* ip_header,
 	ip_header2->ttl = 64; 
 	ip_header2->protocol = 6;
 	ip_header2->id= htons(client_ip_id+2);;
-	ip_header2->saddr = ip_header->daddr;
+	ip_header2->saddr = local_dest_ip_addr;
 	ip_header2->daddr = ip_header->saddr;
 	tcp_header2->doff= 5;
 	tcp_header2->source = tcp_header->dest;
@@ -457,11 +460,10 @@ void session_st::sendFakedSynAckToBackend(struct iphdr* ip_header,
 	tcp_header2->ack=1;
 	tcp_header2->ack_seq = virtual_next_sequence;
 	tcp_header2->seq = tcp_header->ack_seq;
-	tcp_header2->window= 65535;
-	logInfo(LOG_INFO,"send faked syn ack to backend,client window:%u",
-			tcp_header2->window);
+	tcp_header2->window= 65533;
 	unsigned char *data=copy_ip_packet(ip_header2);
 	handshakePackets.push_back(data);
+	outputPacketForDebug(LOG_NOTICE,CLIENT_FLAG,ip_header2,tcp_header2);
 	send_ip_packet(chosenOutput,fake_ip_addr,fake_ack_buf,
 			virtual_next_sequence,&nextSeq);
 	totalSendPackets++;
@@ -626,7 +628,7 @@ unsigned char * session_st::copy_ip_packet(struct iphdr *ip_header)
 	{
 		memcpy(data,ip_header,tot_len);
 		size_t size_ip = ip_header->ihl<<2;
-		struct tcphdr *tcp_header = (struct tcphdr*)((char *)ip_header+size_ip);
+		struct tcphdr *tcp_header = (struct tcphdr*)((char *)data+size_ip);
 		if(tcp_header->dest==remote_port)
 		{
 			logInfo(LOG_ERR,"dest is wrong");
@@ -707,6 +709,7 @@ void session_st::establishConnectionForClosedConn()
 						tcp_header->source));
 		}
 		fake_ip_addr=getRandomIP();
+		logInfo(LOG_NOTICE,"change ip address");
 		uint64_t key=get_ip_port_value(fake_ip_addr,tcp_header->source);
 		trueIPContainer[key]=client_ip_addr;
 
@@ -742,6 +745,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 		isOutput=true;
 		outputPacketForDebug(LOG_DEBUG,CLIENT_FLAG,ip_header,tcp_header);
 	}
+	local_dest_ip_addr=ip_header->daddr;
 
 	save_header_info(ip_header,tcp_header);
 	if(fake_ip_addr!=0)
