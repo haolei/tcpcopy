@@ -2,20 +2,14 @@
 #  include <config.h>
 #endif
 
-#include <unistd.h>
-#include <getopt.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <libgen.h>
-#include <errno.h>
-#include <string.h>
 #include <signal.h>
 
 #include "interception.h"
 
 static void signal_handler(int sig)
 {
-	printf("%d\n",sig);
+	logInfo(LOG_INFO,"set signal handler:%d",sig);
 	interception_over();
 }
 

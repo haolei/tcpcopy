@@ -1,38 +1,8 @@
-/*
- * =====================================================================================
- *
- *       Filename:  main.cpp
- *
- *    Description:  tcp copy entry point
- *
- *        Version:  1.0
- *        Created:  08/02/11 11:31:21
- *       Revision:  none
- *       Compiler:  g++
- *
- *         Author:  wangbin
- *        Company:  netease
- *
- * =====================================================================================
- */
 #include <fcntl.h>
 #include <asm/types.h>
-#include <sys/types.h>
 #include <sys/socket.h> 
-#include <linux/netfilter.h>
-#include <linux/netlink.h>
-#include <linux/netfilter_ipv4.h>
-#include <linux/netfilter_ipv4/ip_queue.h>
-#include <stdio.h>
 #include <signal.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
 #include <arpa/inet.h>
-#include <unistd.h>
-#include <netinet/ip.h>
-#include <netinet/ether.h>
-#include <netinet/in.h> 
 #include <netinet/if_ether.h> 
 #include <pthread.h>
 
@@ -84,7 +54,7 @@ static void putPacketToPool(const char *packet,int len)
 	{
 		if(diff>RECV_POOL_SIZE)
 		{
-			logInfo("pool is full,read count:%lld,write count:%lld,nextWPos:%lld",
+			logInfo(LOG_ERR,"pool is full,read:%lld,write:%lld,nextWPos:%lld",
 					readCounter,writeCounter,nextWPos);
 			pthread_cond_wait(&empty, &mutex);
 		}else
@@ -123,14 +93,14 @@ static char* getPacketFromPool()
 	readCounter=readCounter+len+sizeof(int);
 	if(len<40)
 	{
-		logInfo("packet len is less than 40");
+		logInfo(LOG_WARN,"packet len is less than 40");
 	}
 
 	pthread_cond_signal(&empty);
 	pthread_mutex_unlock (&mutex);
 	if(recvFromPoolPackets%10000==0)
 	{
-		logInfo("recv from pool packets:%d,put packets in pool:%d",
+		logInfo(LOG_INFO,"recv from pool packets:%d,put packets in pool:%d",
 				recvFromPoolPackets,packetsPutNum);
 	}
 	return recvitem;
@@ -144,11 +114,11 @@ static void *dispose(void *threadid)
 	if(NULL!=threadid)
 	{
 		printf("I am booted,thread id:%d\n",*((int*)threadid));
-		logInfo("I am booted,thread id:%d",*((int*)threadid));
+		logInfo(LOG_INFO,"I am booted,thread id:%d",*((int*)threadid));
 	}else
 	{
 		printf("I am booted\n");
-		logInfo("I am booted with no thread id");
+		logInfo(LOG_INFO,"I am booted with no thread id");
 	}
 	while(1)
 	{
@@ -208,18 +178,18 @@ static int retrieve_raw_sockets(int sock)
 				break;
 			}
 			perror("recvfrom");
-			logInfo("recvfrom info error");
+			logInfo(LOG_ERR,"recvfrom info error");
 		}
 		if(recv_len==0)
 		{
-			logInfo("recv len is 0");
+			logInfo(LOG_ERR,"recv len is 0");
 			break;
 		}
 		rawPackets++;
 		if(recv_len>RECV_BUF_SIZE)
 		{
 			printf("recv_len:%d ,it is too long for recvbuf\n",recv_len);
-			logInfo("recv_len:%d ,it is too long for recvbuf",recv_len);
+			logInfo(LOG_ERR,"recv_len:%d ,it is too long for recvbuf",recv_len);
 		}
 		struct etharp_frame *ether = (struct etharp_frame *)recvbuf; 
 		if(ntohs(ether->type) != 0x800){
@@ -236,7 +206,7 @@ static int retrieve_raw_sockets(int sock)
 		count++;
 		if(rawPackets%10000==0)
 		{
-			printf("receive raw packets:%d,valid raw packets:%d,total in pool:%d\n",
+			printf("receive raw packets:%d,valid :%d,total in pool:%d\n",
 					rawPackets,rawValidPackets,packetsPutNum);
 		}
 	}
@@ -272,6 +242,7 @@ static void tcp_copy_over(const int sig){
 	printf("sig %d received\n",sig);
 	close(raw_sock);
 	send_close();
+	endLogInfo();
 	exit(0);
 }
 
@@ -363,20 +334,22 @@ int main(int argc ,char **argv)
 	bool result=true;
 	if(argc != 5)
 	{
-		printf("Usage: %s 61.135.250.201||61.135.250.202 80 61.135.250.217 80\n\n",
+		printf("Usage: %s 61.135.250.1 80 61.135.250.2 80\n",
 				argv[0]);
 		exit(1);
 	}
+	initLogInfo();
 	company_ip=inet_addr("61.135.250.217");
 	result=retrieveVirtualIPAddress(argv[1]);
 	if(!result)
 	{
 		printf("it does not support local ip addr or domain name");
+		logInfo(LOG_ERR,"it does not support local ip addr or domain name");
 	}
 	local_port = htons(atoi(argv[2]));
 	remote_ip = inet_addr(argv[3]);
 	remote_port = htons(atoi(argv[4]));
-	
+
 	set_signal_handler();
 	if(SUCCESS==init_tcp_copy())
 	{

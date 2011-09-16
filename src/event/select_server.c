@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/select.h>
+
 #include "select_server.h"
 
 static int              	max_fd;
@@ -11,10 +12,24 @@ static select_server_func 	callback_func;
 static int              	valid_fds[1024];
 static int              	fd_nums;
 
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  select_sever_set_callback
+ *  Description:  set callback function
+ * =====================================================================================
+ */
 void select_sever_set_callback(select_server_func func){
 	callback_func = func;
 }
 
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  select_sever_add
+ *  Description:  add fd to select read set
+ * =====================================================================================
+ */
 void select_sever_add(int fd){
 	FD_SET(fd,&read_set);
 	if(fd > max_fd){
@@ -24,6 +39,13 @@ void select_sever_add(int fd){
 	fd_nums++;
 }
 
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  select_sever_del
+ *  Description:  del fd from select read set
+ * =====================================================================================
+ */
 void select_sever_del(int fd){
 	FD_CLR(fd,&read_set);
 	max_fd = 0;
@@ -46,6 +68,13 @@ void select_sever_del(int fd){
 	}
 }
 
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  select_server_run
+ *  Description:  server run for receiving message
+ * =====================================================================================
+ */
 void select_server_run(){
 	while(1){
 		fd_set r_set = read_set;

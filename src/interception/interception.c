@@ -12,12 +12,17 @@ static void set_sock_no_delay(int sock){
 	int flag = 1;
 	if(setsockopt(sock,IPPROTO_TCP,TCP_NODELAY,(char *)&flag,sizeof(flag)) == -1){
 		perror("setsockopt:");
+		logInfo(LOG_ERR,"setsockopt error");
 		exit(errno);
 	}
 }
 
-/*static void formatOutput(struct iphdr *ip_header)
+static void formatOutput(int level,struct iphdr *ip_header)
 {
+	if(output_level >= level)
+	{
+		return;
+	}
 	struct in_addr srcaddr;
 	struct in_addr destaddr;
 	srcaddr.s_addr=ip_header->saddr;
@@ -36,12 +41,12 @@ static void set_sock_no_delay(int sock){
 	unsigned int seq=ntohl(tcp_header->seq);
 	unsigned int ack_seq=ntohl(tcp_header->ack_seq);
 	{
-		printf("from backend server: %s:%u-->%s:%u,length %u,seq=%u,ack_seq=%u\n",
-				sbuf,ntohs(tcp_header->source),dbuf,ntohs(tcp_header->dest),packSize,seq,ack_seq);
+		logInfo(level,"%s:%u-->%s:%u,length %u,seq=%u,ack_seq=%u",sbuf,
+				ntohs(tcp_header->source),dbuf,ntohs(tcp_header->dest),
+				packSize,seq,ack_seq);
 	}
 
-}*/
-
+}
 
 static int seq =0;
 static unsigned char drop_buffer[128];
@@ -66,10 +71,12 @@ static int drop_netlink_packet(int packet_id)
 				(struct sockaddr *)&addr,sizeof(struct sockaddr_nl))<0)
 	{
 		perror("unable to send mode message");
+		logInfo(LOG_ERR,"unable to send mode message");
 		exit(0);
 	}
 	return 1;
 }
+
 static int recvFromTest=0;
 static void interception_process(int fd){
 	if(fd == msg_listen_sock){
@@ -84,7 +91,7 @@ static void interception_process(int fd){
 		status_update(ip_header);
 		recvFromTest++;
 		{
-			//formatOutput(ip_header);
+			formatOutput(LOG_DEBUG,ip_header);
 		}
 		//drop the packet
 		drop_netlink_packet(packet_id);  	
@@ -103,6 +110,12 @@ static void interception_process(int fd){
 	}
 }
 
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  interception_init
+ *  Description:  init for interception
+ * =====================================================================================
+ */
 void interception_init(){
 	delay_table_init();
 	status_init();
@@ -113,20 +126,34 @@ void interception_init(){
 	select_sever_add(firewall_sock);
 }
 
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  interception_run
+ *  Description:  main procedure for running interception
+ * =====================================================================================
+ */
 void interception_run(){
 	select_server_run();
 }
 
-void interception_over(){
-	if(firewall_sock!=-1)
-	{
-		close(firewall_sock);
-	}
 
-	if(msg_listen_sock!=-1)
-	{
-		close(msg_listen_sock);
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  interception_over
+ *  Description:  clean all fds for interception over
+ * =====================================================================================
+ */
+	void interception_over(){
+		if(firewall_sock!=-1)
+		{
+			close(firewall_sock);
+		}
+
+		if(msg_listen_sock!=-1)
+		{
+			close(msg_listen_sock);
+		}
+		exit(0);
 	}
-	exit(0);
-}
 

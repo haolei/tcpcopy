@@ -1,21 +1,5 @@
-/*
- * =====================================================================================
- *
- *       Filename:  select_server.h
- *       Compiler:  gcc
- *
- *         Author:  wangbo@corp.netease.com
- *
- *      CopyRight:  Copyright (c) netease
- *
- *    Description:  
- *
- *        Created:  2010-07-12 22:11:24
- * =====================================================================================
- */
-
-#ifndef  _TCPCOPY_SELECT_SERVER_H__INC
-#define  _TCPCOPY_SELECT_SERVER_H__INC
+#ifndef  _TCPCOPY_SELECT_SERVER_H_INC
+#define  _TCPCOPY_SELECT_SERVER_H_INC
 
 #ifdef __cplusplus
 extern "C"
@@ -34,7 +18,5 @@ extern "C"
 }
 #endif
 
-#endif   /* ----- #ifndef _TCPCOPY_SELECT_SERVER_H__INC  ----- */
-
-
+#endif   /* ----- #ifndef _TCPCOPY_SELECT_SERVER_H_INC  ----- */
 

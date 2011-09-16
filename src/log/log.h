@@ -1,22 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  log.h
- *
- *    Description:  
- *
- *        Version:  1.0
- *        Created:  08/10/11 16:44:05
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  wangbin
- *        Company:  netease
- *
- * =====================================================================================
- */
-
-
 #ifndef  _LOG_H_INC
 #define  _LOG_H_INC
 
@@ -30,7 +11,19 @@ extern "C"
 {
 #endif
 
-void logInfo(char *fmt, ...);
+#define LOG_STDERR            0
+#define LOG_EMERG             1
+#define LOG_ALERT             2
+#define LOG_CRIT              3
+#define LOG_ERR               4
+#define LOG_WARN              5
+#define LOG_NOTICE            6
+#define LOG_INFO              7
+#define LOG_DEBUG             8 
+
+	void initLogInfo();
+	void logInfo(int level,char *fmt, ...);
+	void endLogInfo();
 
 #ifdef __cplusplus
 }

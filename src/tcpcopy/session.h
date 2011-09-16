@@ -1,30 +1,9 @@
-/*
- * =====================================================================================
- *
- *       Filename:  session.h
- *       Compiler:  g++
- *
- *         Author:  wangbin@corp.netease.com(orignal author wangbo@corp.netease.com)
- *
- *      CopyRight:  Copyright (c) netease
- *
- *    Description:  
- *
- *        Created:  2009-09-10 16:48:06
- * =====================================================================================
- */
+#ifndef  _TCP_REDIRECT_SESSION_H_INC
+#define  _TCP_REDIRECT_SESSION_H_INC
 
 
-#ifndef  _TCP_REDIRECT_SESSION_H__INC
-#define  _TCP_REDIRECT_SESSION_H__INC
-
-
-#include <sys/types.h>
-#include <stdio.h>
-#include <assert.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
-#include <stdlib.h>
 #include <sys/time.h>
 #include <list>
 #include <time.h>
@@ -39,6 +18,7 @@ extern virtual_ip_addr local_ips;
 extern uint16_t local_port;
 extern uint32_t remote_ip;
 extern uint16_t remote_port;
+extern int output_level;
 
 #pragma pack(push,1)
 struct etharp_frame { 
@@ -49,7 +29,8 @@ struct etharp_frame {
 #pragma pack(pop)
 void process(char *);
 bool isPacketNeeded(const char *packet);
-void outputPacketForDebug(int flag,struct iphdr *ip_header,struct tcphdr *tcp_header);
+void outputPacketForDebug(int level,int flag,struct iphdr *ip_header,
+		struct tcphdr *tcp_header);
 typedef std::list<unsigned char *> dataContainer;
 typedef std::list<unsigned char *>::iterator dataIterator;
 
@@ -212,19 +193,26 @@ struct session_st
 	}
 	int sendReservedLostPackets();
 	int sendReservedPackets();
-	void update_virtual_status(struct iphdr *ip_header,struct tcphdr* tcp_header);
-	void establishConnectionForNoSynPackets(struct iphdr *ip_header,struct tcphdr *tcp_header);
+	void update_virtual_status(struct iphdr *ip_header,
+			struct tcphdr* tcp_header);
+	void establishConnectionForNoSynPackets(struct iphdr *ip_header,
+			struct tcphdr *tcp_header);
 	void establishConnectionForClosedConn();
-	void sendFakedSynToBackend(struct iphdr* ip_header,struct tcphdr* tcp_header);
-	void sendFakedSynAckToBackend(struct iphdr* ip_header,struct tcphdr* tcp_header);
-	void sendFakedAckToBackend(struct iphdr* ip_header,struct tcphdr* tcp_header);
-	void sendFakedFinToBackend(struct iphdr* ip_header,struct tcphdr* tcp_header);
+	void sendFakedSynToBackend(struct iphdr* ip_header,
+			struct tcphdr* tcp_header);
+	void sendFakedSynAckToBackend(struct iphdr* ip_header,
+			struct tcphdr* tcp_header);
+	void sendFakedAckToBackend(struct iphdr* ip_header,
+			struct tcphdr* tcp_header);
+	void sendFakedFinToBackend(struct iphdr* ip_header,
+			struct tcphdr* tcp_header);
 	unsigned char * copy_ip_packet(struct iphdr *ip_header);
 	void save_header_info(struct iphdr *ip_header,struct tcphdr *tcp_header);
 	void process_recv(struct iphdr *ip_header,struct tcphdr *tcp_header);
 	bool is_over()
 	{
-		if(confirmed&& (virtual_status&CLIENT_FIN) && (virtual_status&SERVER_FIN))
+		if(confirmed&& (virtual_status&CLIENT_FIN) && 
+				(virtual_status&SERVER_FIN))
 		{
 			return true;
 		}
@@ -245,5 +233,5 @@ inline uint64_t get_ip_port_value(uint32_t s_ip,uint16_t s_port)
 }
 
 
-#endif   /* ----- #ifndef _TCP_REDIRECT_SESSION_H__INC  ----- */
+#endif   /* ----- #ifndef _TCP_REDIRECT_SESSION_H_INC  ----- */
 
