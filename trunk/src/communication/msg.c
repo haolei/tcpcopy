@@ -119,7 +119,8 @@ int msg_copyer_send(int sock,uint32_t c_ip,uint16_t c_port,uint16_t type){
 	buf.type = type;
 	ssize_t sendlen = send(sock,(const void *)&buf,sizeof(buf),0);
 	if(sendlen != sizeof(buf)){
-		logInfo(LOG_WARN,"send length is not equal buffer size");
+		logInfo(LOG_WARN,"send length:%ld,buffer size:%u",
+				sendlen,sizeof(buf));
 		return -1;
 	}
 	return sendlen;
