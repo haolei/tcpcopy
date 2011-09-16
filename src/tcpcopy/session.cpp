@@ -416,6 +416,7 @@ void session_st::sendFakedSynToBackend(struct iphdr* ip_header,
 	ip_header2->saddr = ip_header->saddr;
 	tcp_header2->doff= 8;
 	tcp_header2->source = tcp_header->source;
+	tcp_header2->dest= tcp_header->dest;
 	tcp_header2->syn=1;
 	tcp_header2->seq = minus_1(tcp_header->seq);
 	client_window=65535;
