@@ -414,6 +414,7 @@ void session_st::sendFakedSynToBackend(struct iphdr* ip_header,
 	ip_header2->protocol = 6;
 	ip_header2->id= htons(client_ip_id+2);;
 	ip_header2->saddr = ip_header->saddr;
+	ip_header2->daddr = ip_header->daddr;
 	tcp_header2->doff= 8;
 	tcp_header2->source = tcp_header->source;
 	tcp_header2->dest= tcp_header->dest;
@@ -449,8 +450,10 @@ void session_st::sendFakedSynAckToBackend(struct iphdr* ip_header,
 	ip_header2->protocol = 6;
 	ip_header2->id= htons(client_ip_id+2);;
 	ip_header2->saddr = ip_header->daddr;
+	ip_header2->daddr = ip_header->saddr;
 	tcp_header2->doff= 5;
 	tcp_header2->source = tcp_header->dest;
+	tcp_header2->dest= tcp_header->source;
 	tcp_header2->ack=1;
 	tcp_header2->ack_seq = virtual_next_sequence;
 	tcp_header2->seq = tcp_header->ack_seq;
