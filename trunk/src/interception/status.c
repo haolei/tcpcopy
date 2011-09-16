@@ -1,18 +1,20 @@
-
 #include "../communication/msg.h"
 #include "hash.h"
 #include "status.h"
 #include "delay.h"
 
 static hash_table *table;
+
 static inline uint64_t get_key(uint32_t ip,uint16_t port){
 	uint64_t value=((uint64_t)ip<<16);
 	value+=port;
 	return value;
 }
+
 void status_init(){
 	table = hash_create(1024*128);
 }
+
 void status_del(uint32_t ip,uint16_t port){
 	hash_del(table,get_key(ip,port));
 }
@@ -39,6 +41,4 @@ void status_update(struct iphdr *ip_header){
 	msg_receiver_send((int)(long)fd,&msg);
 
 }
-
-
 

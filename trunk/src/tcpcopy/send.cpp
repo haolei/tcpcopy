@@ -1,21 +1,4 @@
-/*
- * =====================================================================================
- *
- *       Filename:  send.cpp
- *       Compiler:  g++
- *
- *         Author:  bwang@corp.netease.com(original author wangbo@corp.netease.com)
- *
- *      CopyRight:  Copyright (c) netease
- *
- *    Description:  
- *
- *        Created:  2009-09-09 19:43:39
- * =====================================================================================
- */
-
 #include <string.h>
-#include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
 #include "../log/log.h"
@@ -27,17 +10,16 @@ static struct sockaddr_in toaddr;
 int send_init()
 {
 	//On Linux when setting the protocol as IPPROTO_RAW,
-	//then by default the kernel sets the IP_HDRINCL option and thus does not prepend
-	//its own IP header. 
+	//then by default the kernel sets the IP_HDRINCL option and 
+	//thus does not prepend its own IP header. 
 	sock = socket(AF_INET, SOCK_RAW,IPPROTO_RAW);
 	if (sock>0) 
 	{
-		printf("create ip raw socket for sending packets successfully\n");
+		logInfo(LOG_INFO,"create ip raw socket successfully");
 	} 
 	else 
 	{
-		logInfo("it can't create ip raw socket for sending packets");
-		printf("it can't create ip raw socket for sending packets\n");
+		logInfo(LOG_ERR,"it can't create ip raw socket for sending packets");
 	} 
 	int n=1; 
 	//tell the IP layer not to prepend its own header
@@ -76,7 +58,8 @@ static unsigned short csum (unsigned short *packet, int packlen)
 } 
 
 static unsigned short buf[2048]; 
-static unsigned short tcpcsum(unsigned char *iphdr,unsigned short *packet,int packlen) 
+static unsigned short tcpcsum(unsigned char *iphdr,unsigned short *packet,
+		int packlen) 
 { 
 	unsigned short res; 
 	memcpy(buf,iphdr+12,8); 
@@ -90,11 +73,12 @@ static unsigned short tcpcsum(unsigned char *iphdr,unsigned short *packet,int pa
 /**
  * sending one ip packet(it will not go through fragmentation))
  */
-uint32_t send_ip_packet(bool isOutput,uint64_t fake_ip_addr,unsigned char *data,uint32_t ack_seq,uint32_t* nextSeq)
+uint32_t send_ip_packet(bool isOutput,uint64_t fake_ip_addr,
+		unsigned char *data,uint32_t ack_seq,uint32_t* nextSeq)
 {
 	if(! data)
 	{
-		logInfo("error ip data is null");
+		logInfo(LOG_ERR,"error ip data is null");
 		return 0;
 	}
 	struct iphdr *ip_header = (struct iphdr *)data;
@@ -148,22 +132,22 @@ uint32_t send_ip_packet(bool isOutput,uint64_t fake_ip_addr,unsigned char *data,
 	ip_header->check = csum((unsigned short *)ip_header,size_ip); 
 	if(isOutput)
 	{
-		outputPacketForDebug(SERVER_BACKEND_FLAG,ip_header,tcp_header);
+		outputPacketForDebug(LOG_DEBUG,SERVER_BACKEND_FLAG,ip_header,tcp_header);
 	}
-	//the IP layer isn't involved at all. This has one negative effect in result (although in
-	//performance it's better): no IP fragmentation will take place if needed. This
-	//means that a raw packet larger than the MTU of the interface will probably
-	//be discarded. Instead ip_local_error(), which does general sk_buff cleaning,
-	//is called and an error EMSGSIZE is returned. On the other hand, normal raw
-	//socket frag
+	//the IP layer isn't involved at all. This has one negative effect in result
+	//(although in performance it's better): no IP fragmentation will take place
+	//if needed. This means that a raw packet larger than the MTU of the 
+	//interface will probably be discarded. Instead ip_local_error(), 
+	//which does general sk_buff cleaning,is called and an error EMSGSIZE 
+	//is returned. On the other hand, normal raw socket frag
 	//if tot_len is more than 1500,it will fail
-	int send_len = sendto(sock,(char *)ip_header,tot_len,0,(struct sockaddr *)&toaddr,sizeof(toaddr));
+	int send_len = sendto(sock,(char *)ip_header,tot_len,0,
+			(struct sockaddr *)&toaddr,sizeof(toaddr));
 	if(send_len == -1)
 	{
 		perror("send to");
-		logInfo("send to backend error,tot_len is:%d,contentlen:%d",tot_len,contenLen);
-
-
+		logInfo(LOG_ERR,"send to backend error,tot_len is:%d,contentlen:%d",
+				tot_len,contenLen);
 	}
 	return send_len;
 

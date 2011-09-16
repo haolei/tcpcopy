@@ -1,32 +1,5 @@
-/*
- * =====================================================================================
- *
- *       Filename:  linklist.c
- *       Compiler:  gcc
- *
- *         Author:  wangbo@corp.netease.com
- *
- *      CopyRight:  Copyright (c) netease
- *
- *    Description:
- *
- *        Created:  2010-07-24 23:02:58
- * =====================================================================================
- */
-
-#include <stdio.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <signal.h>
-#include <sys/param.h>
-#include <sys/stat.h>
-#include <time.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <sys/file.h>
-#include <string.h>
 #include <stdio.h>
-#include <stdint.h>
 
 #include "linklist.h"
 

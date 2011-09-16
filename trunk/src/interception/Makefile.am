@@ -10,4 +10,5 @@ interception_SOURCES=\
 					 main.c
 interception_LDADD=\
 				   ../event/libevent.a\
+				   ../log/liblog.a\
 				   ../communication/libmsg.a

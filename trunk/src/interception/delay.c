@@ -1,31 +1,11 @@
-/*
- * =====================================================================================
- *
- *       Filename:  delay.c
- *       Compiler:  gcc
- *
- *         Author:  wangbo@corp.netease.com
- *
- *      CopyRight:  Copyright (c) netease
- *
- *    Description:  
- *
- *        Created:  2010-07-25 16:21:25
- * =====================================================================================
- */
-
 #include "hash.h"
 #include "delay.h"
 
 static hash_table  *table;
 
-void delay_table_init(){
-	table = hash_create(65536);
-	hash_set_timeout(table,10);
-}
-
 static struct receiver_msg_st * copy_message(struct receiver_msg_st *msg){
-	struct receiver_msg_st *cmsg = (struct receiver_msg_st *)malloc(sizeof(struct receiver_msg_st));
+	struct receiver_msg_st *cmsg = NULL;
+	cmsg=(struct receiver_msg_st *)malloc(sizeof(struct receiver_msg_st));
 	if(cmsg == NULL){
 		perror("malloc");
 		exit(1);
@@ -34,6 +14,24 @@ static struct receiver_msg_st * copy_message(struct receiver_msg_st *msg){
 	return cmsg;
 }
 
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  delay_table_init
+ *  Description:  init delay table
+ * =====================================================================================
+ */
+void delay_table_init(){
+	table = hash_create(65536);
+	hash_set_timeout(table,10);
+}
+
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  delay_table_add
+ *  Description:  add msg to delay table
+ * =====================================================================================
+ */
 void delay_table_add(uint64_t key,struct receiver_msg_st *msg){
 	linklist *msg_list =(linklist *)hash_find(table,key);
 	struct receiver_msg_st *cmsg = copy_message(msg);
@@ -46,6 +44,13 @@ void delay_table_add(uint64_t key,struct receiver_msg_st *msg){
 	return;
 }
 
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  delay_table_send
+ *  Description:  send delayed message according key
+ * =====================================================================================
+ */
 void delay_table_send(uint64_t key,int fd){
 	linklist *msg_list =(linklist *)hash_find(table,key);
 	if(msg_list == NULL){
@@ -59,5 +64,4 @@ void delay_table_send(uint64_t key,int fd){
 		lnode_free(first);
 	}
 }
-
 
