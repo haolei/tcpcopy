@@ -695,7 +695,7 @@ void session_st::establishConnectionForClosedConn()
 		{
 			free(tmpData);
 			logInfo(LOG_WARN,"sock is invalid in establishConnForClosedConn");
-			outputPacketForDebug(LOG_WARN,CLIENT_FLAG,ip_header,tcp_header);
+			outputPacketForDebug(LOG_NOTICE,CLIENT_FLAG,ip_header,tcp_header);
 			return;
 		}
 		if(0 == fake_ip_addr)
@@ -1168,7 +1168,7 @@ void process(char *packet)
 					}else
 					{
 						logInfo(LOG_WARN,"duplicate syn,time diff:%d",diff);
-						outputPacketForDebug(LOG_WARN,CLIENT_FLAG,ip_header,
+						outputPacketForDebug(LOG_NOTICE,CLIENT_FLAG,ip_header,
 								tcp_header);
 						return;
 					}
@@ -1178,7 +1178,7 @@ void process(char *packet)
 				//reuse port number
 				iter->second.initSession();
 				reusePort=true;
-				logInfo(LOG_WARN,"reuse port number,key :%llu",value);
+				logInfo(LOG_NOTICE,"reuse port number,key :%llu",value);
 			}
 			int sock=address_find_sock(tcp_header->dest);
 			if(-1 == sock)
@@ -1232,7 +1232,7 @@ void process(char *packet)
 				//we check if we can pad tcp handshake for this request
 				if(checkPacketPadding(ip_header,tcp_header))
 				{
-					logInfo(LOG_WARN,"it tries to initiate conn for data packets");
+					logInfo(LOG_NOTICE,"it tries to initiate conn for data packets");
 					sessions[value].process_recv(ip_header,tcp_header);
 				}else
 				{
