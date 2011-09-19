@@ -12,6 +12,15 @@ static void signal_handler(int sig)
 	logInfo(LOG_INFO,"set signal handler:%d",sig);
 	interception_over();
 	endLogInfo();
+
+	if(SIGSEGV==sig)
+	{    
+		signal(SIGSEGV, SIG_DFL);                                                                                                   
+		kill(getpid(), sig);
+	}else
+	{    
+		exit(EXIT_SUCCESS);
+	} 
 }
 
 static void set_signal_handler(){
