@@ -39,9 +39,13 @@ void delay_table_init(){
  */
 void delay_table_destroy()
 {
-	logInfo(LOG_NOTICE,"destroy delayed table");
-	hash_destory(table);
-	free(table);
+	if(table!=NULL)
+	{
+		logInfo(LOG_NOTICE,"destroy delayed table");
+		hash_destory(table);
+		free(table);
+		table=NULL;
+	}
 }
 
 /* 

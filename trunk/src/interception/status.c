@@ -50,8 +50,12 @@ void status_update(struct iphdr *ip_header){
 
 void status_destroy()
 {
-	logInfo(LOG_NOTICE,"destroy status table");
-	hash_destory(table);
-	free(table);
+	if(table!=NULL)
+	{
+		logInfo(LOG_NOTICE,"destroy status table");
+		hash_destory(table);
+		free(table);
+		table=NULL;
+	}
 }
 
