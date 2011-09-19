@@ -27,6 +27,7 @@ void delay_table_init(){
 	hash_set_timeout(table,30);
 	strcpy(table->name,"delay-table");
 	table->deepDeleteFlag=1;
+	logInfo(LOG_NOTICE,"create table %s,size:%u",table->name,table->size);
 }
 
 

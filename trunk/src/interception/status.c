@@ -17,6 +17,8 @@ void status_init(){
 	table = hash_create(1024*256);
 	table->deepDeleteFlag=0;
 	strcpy(table->name,"client--src table");
+	logInfo(LOG_NOTICE,"create table %s,size:%u",
+			table->name,table->size);
 }
 
 void status_del(uint32_t ip,uint16_t port){
