@@ -452,7 +452,7 @@ void session_st::sendFakedSynAckToBackend(struct iphdr* ip_header,
 	ip_header2->ttl = 64; 
 	ip_header2->protocol = 6;
 	ip_header2->id= htons(client_ip_id+2);;
-	ip_header2->saddr = fake_ip_addr;
+	ip_header2->saddr = client_ip_addr;
 	ip_header2->daddr = local_dest_ip_addr; 
 	tcp_header2->doff= 5;
 	tcp_header2->source = tcp_header->dest;
@@ -628,12 +628,6 @@ unsigned char * session_st::copy_ip_packet(struct iphdr *ip_header)
 	if(data)
 	{
 		memcpy(data,ip_header,tot_len);
-		size_t size_ip = ip_header->ihl<<2;
-		struct tcphdr *tcp_header = (struct tcphdr*)((char *)data+size_ip);
-		if(tcp_header->dest==remote_port)
-		{
-			logInfo(LOG_ERR,"dest is wrong");
-		}
 	}
 	return data;
 }
@@ -691,11 +685,14 @@ void session_st::establishConnectionForClosedConn()
 	{
 		unsigned char *data = handshakePackets.front();
 		struct iphdr *ip_header = (struct iphdr*)data;
+		unsigned char* tmpData=copy_ip_packet(ip_header);
+		ip_header=(struct iphdr*)tmpData;
 		size_t size_ip = ip_header->ihl<<2;
 		struct tcphdr *tcp_header = (struct tcphdr*)((char *)ip_header+size_ip);
 		int sock=address_find_sock(tcp_header->dest);
 		if(-1 == sock)
 		{
+			free(tmpData);
 			logInfo(LOG_WARN,"sock is invalid in establishConnForClosedConn");
 			outputPacketForDebug(LOG_WARN,CLIENT_FLAG,ip_header,tcp_header);
 			return;
@@ -719,6 +716,7 @@ void session_st::establishConnectionForClosedConn()
 				tcp_header->source,CLIENT_ADD);
 		if(-1 == result)
 		{
+			free(tmpData);
 			logInfo(LOG_ERR,"msg copyer send error");
 			return;
 		}
@@ -726,6 +724,7 @@ void session_st::establishConnectionForClosedConn()
 				virtual_next_sequence,&nextSeq);
 		isSynIntercepted=true;
 		totalSendPackets++;
+		free(tmpData);
 		data=handshakePackets.back();
 		ip_header=(struct iphdr *)data;
 		ip_header->saddr=fake_ip_addr;
@@ -747,7 +746,10 @@ void session_st::process_recv(struct iphdr *ip_header,
 		outputPacketForDebug(LOG_DEBUG,CLIENT_FLAG,ip_header,tcp_header);
 	}
 	local_dest_ip_addr=ip_header->daddr;
-
+	if(0 == fake_ip_addr)
+	{
+		client_ip_addr=ip_header->saddr;
+	}
 	save_header_info(ip_header,tcp_header);
 	if(fake_ip_addr!=0)
 	{
