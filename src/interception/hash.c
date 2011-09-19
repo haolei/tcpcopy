@@ -62,9 +62,25 @@ static inline linklist * get_linklist(hash_table *table,uint64_t key){
 	return l;
 }
 
+static time_t lastUpdate;
+static void checkDeleteTimeout(hash_table *table,linklist *l)
+{
+	if(0==lastUpdate)
+	{
+		lastUpdate=time(0);
+	}
+	time_t now=time(0);
+	int diff=now-lastUpdate;
+	if(diff>30)
+	{
+		delete_timeout(table,l);
+		lastUpdate=now;
+	}
+}
+
 static lnodeptr  hash_find_node(hash_table *table,uint64_t key){
 	linklist *l = get_linklist(table,key);
-	delete_timeout(table,l);
+	checkDeleteTimeout(table,l);
 	lnodeptr node = linklist_first(l);
 	while(node){
 		hash_node *hnode = (hash_node *)node->data;
