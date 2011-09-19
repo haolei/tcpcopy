@@ -6,7 +6,7 @@ static hash_table  *table;
 static struct receiver_msg_st * copy_message(struct receiver_msg_st *msg){
 	struct receiver_msg_st *cmsg = NULL;
 	cmsg=(struct receiver_msg_st *)malloc(sizeof(struct receiver_msg_st));
-	if(cmsg == NULL){
+	if(NULL == cmsg){
 		perror("malloc");
 		exit(1);
 	}
@@ -53,7 +53,7 @@ void delay_table_add(uint64_t key,struct receiver_msg_st *msg){
  */
 void delay_table_send(uint64_t key,int fd){
 	linklist *msg_list =(linklist *)hash_find(table,key);
-	if(msg_list == NULL){
+	if(NULL == msg_list){
 		return;	
 	}
 	while(! linklist_is_empty(msg_list)){
