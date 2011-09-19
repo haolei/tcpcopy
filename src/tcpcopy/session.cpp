@@ -1232,7 +1232,7 @@ void process(char *packet)
 				//we check if we can pad tcp handshake for this request
 				if(checkPacketPadding(ip_header,tcp_header))
 				{
-					logInfo(LOG_NOTICE,"it tries to initiate conn for data packets");
+					logInfo(LOG_NOTICE,"it tries to initiate conn");
 					sessions[value].process_recv(ip_header,tcp_header);
 				}else
 				{
