@@ -34,7 +34,6 @@ hash_table *hash_create(size_t size){
 		htable->lists[i] = linklist_create();
 	}
 	htable->timeout = DEFAULT_TIMEOUT;
-	logInfo(LOG_NOTICE,"create table,size:%u",size);
 	return htable;
 }
 
