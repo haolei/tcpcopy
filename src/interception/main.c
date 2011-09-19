@@ -8,11 +8,16 @@
 
 #include "interception.h"
 
+static int excuted=0;
 static void signal_handler(int sig)
 {
-	logInfo(LOG_INFO,"set signal handler:%d",sig);
-	interception_over();
-	endLogInfo();
+	if(!excuted)
+	{
+		logInfo(LOG_INFO,"set signal handler:%d",sig);
+		interception_over();
+		endLogInfo();
+		excuted=1;
+	}
 
 	if(SIGSEGV==sig)
 	{    
