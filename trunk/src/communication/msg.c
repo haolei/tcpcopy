@@ -133,10 +133,15 @@ int msg_copyer_send(int sock,uint32_t c_ip,uint16_t c_port,uint16_t type){
  * =====================================================================================
  */
 int msg_receiver_send(int sock,struct receiver_msg_st * msg){
-	ssize_t sendlen = send(sock,(const void *)msg,sizeof(struct receiver_msg_st),0);
-	if(sendlen != sizeof(*msg)){
-		logInfo(LOG_NOTICE,"send length is not equal to msg size:%u",sendlen);	
-		return -1;
+	ssize_t sendlen = send(sock,(const void *)msg,
+			sizeof(struct receiver_msg_st),0);
+	if(sendlen!=-1)
+	{
+		if(sendlen != sizeof(*msg)){
+			logInfo(LOG_NOTICE,"send length is not equal to msg size:%u",
+					sendlen);	
+			return -1;
+		}
 	}
 	return sendlen;
 }
