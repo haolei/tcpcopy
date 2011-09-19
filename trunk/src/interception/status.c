@@ -1,4 +1,5 @@
 #include "../communication/msg.h"
+#include "../log/log.h"
 #include "hash.h"
 #include "status.h"
 #include "delay.h"
@@ -47,6 +48,7 @@ void status_update(struct iphdr *ip_header){
 
 void status_destroy()
 {
+	logInfo(LOG_NOTICE,"destroy status table");
 	hash_destory(table);
 	free(table);
 }

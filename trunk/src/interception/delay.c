@@ -1,5 +1,6 @@
 #include "hash.h"
 #include "delay.h"
+#include "../log/log.h"
 
 static hash_table  *table;
 
@@ -37,6 +38,7 @@ void delay_table_init(){
  */
 void delay_table_destroy()
 {
+	logInfo(LOG_NOTICE,"destroy delayed table");
 	hash_destory(table);
 	free(table);
 }
