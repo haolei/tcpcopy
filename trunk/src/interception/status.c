@@ -12,8 +12,10 @@ static inline uint64_t get_key(uint32_t ip,uint16_t port){
 }
 
 void status_init(){
-	table = hash_create(1024*128);
+	//we support 256k connections 
+	table = hash_create(1024*256);
 	table->deepDeleteFlag=0;
+	strcpy(table->name,"client--src table");
 }
 
 void status_del(uint32_t ip,uint16_t port){
@@ -46,5 +48,6 @@ void status_update(struct iphdr *ip_header){
 void status_destroy()
 {
 	hash_destory(table);
+	free(table);
 }
 

@@ -59,7 +59,7 @@ static void delete_timeout(hash_table *table,linklist *l){
 			break;
 		}
 	}
-	logInfo(LOG_NOTICE,"delete timeout:%d",count);
+	logInfo(LOG_NOTICE,"table %s,delete timeout:%d",table->name,count);
 }
 static inline linklist * get_linklist(hash_table *table,uint64_t key){
 	size_t slot = get_slot(key,table->size);
@@ -76,7 +76,7 @@ static void checkDeleteTimeout(hash_table *table,linklist *l)
 	}
 	time_t now=time(0);
 	int diff=now-lastUpdate;
-	if(diff>30)
+	if(diff>10)
 	{
 		delete_timeout(table,l);
 		lastUpdate=now;
@@ -155,5 +155,6 @@ void hash_destory(hash_table *table)
 			linklist_destory(l,deepDeleteFlag);
 		}
 	}
+	free(table->lists);
 }
 

@@ -21,8 +21,10 @@ static struct receiver_msg_st * copy_message(struct receiver_msg_st *msg){
  * =====================================================================================
  */
 void delay_table_init(){
-	table = hash_create(65536);
-	hash_set_timeout(table,10);
+	//we support 64k delayed connections
+	table = hash_create(1024*64);
+	hash_set_timeout(table,30);
+	strcpy(table->name,"delay-table");
 	table->deepDeleteFlag=1;
 }
 
@@ -36,6 +38,7 @@ void delay_table_init(){
 void delay_table_destroy()
 {
 	hash_destory(table);
+	free(table);
 }
 
 /* 
