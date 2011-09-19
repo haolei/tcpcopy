@@ -8,16 +8,27 @@
 
 #include "interception.h"
 
+static void releaseResources()
+{
+	interception_over();
+	endLogInfo();
+}
+
 static void signal_handler(int sig)
 {
 	printf("set signal handler:%d\n",sig);
-	interception_over();
-	endLogInfo();
-
+	if(SIGSEGV==sig)
+	{    
+		signal(SIGSEGV, SIG_DFL);
+		kill(getpid(), sig);
+	}else
+	{    
+		exit(EXIT_SUCCESS);
+	} 
 }
 
 static void set_signal_handler(){
-	atexit(interception_over);
+	atexit(releaseResources);
 	signal(SIGINT,signal_handler);
 	signal(SIGPIPE,signal_handler);
 	signal(SIGHUP,signal_handler);
