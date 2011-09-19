@@ -1,4 +1,5 @@
 #include "hash.h"
+#include "linklist.h"
 #include "../log/log.h"
 
 static hash_node *hash_node_malloc(uint64_t key,void *data){
@@ -39,6 +40,7 @@ hash_table *hash_create(size_t size){
 static void delete_timeout(hash_table *table,linklist *l){
 	time_t  nowtime = time(NULL);
 	int count=0;
+	int deepDeleteFlag=table->deepDeleteFlag;
 	while(1){
 		lnodeptr node = linklist_tail(l);
 		if(! node ){
@@ -47,7 +49,10 @@ static void delete_timeout(hash_table *table,linklist *l){
 		hash_node *hnode = (hash_node *)node->data;
 		if(hnode->access_time+table->timeout < nowtime){
 			lnodeptr tail=linklist_pop_tail(l);
-			free(tail->data);
+			if(deepDeleteFlag&&NULL!=tail->data)
+			{
+				free(tail->data);
+			}
 			free(tail);
 			count++;
 		}else{
@@ -121,8 +126,13 @@ void hash_add(hash_table *table,uint64_t key,void *data){
 
 void hash_del(hash_table *table,uint64_t key){
 	lnodeptr node = hash_find_node(table,key);
+	int deepDeleteFlag=table->deepDeleteFlag;
 	if(node != NULL){
 		linklist_remove(node);
+		if(deepDeleteFlag&&node->data!=NULL)
+		{
+			free(node->data);
+		}
 		lnode_free(node);
 	}
 	return;
@@ -130,5 +140,20 @@ void hash_del(hash_table *table,uint64_t key){
 
 void hash_set_timeout(hash_table *table,int t){
 	table->timeout = t;
+}
+
+void hash_destory(hash_table *table)
+{
+	uint32_t index=0;
+	linklist* l=NULL;
+	int deepDeleteFlag=table->deepDeleteFlag;
+	for(;index<table->size;index++)
+	{
+		l=table->lists[index];
+		if(l!=NULL)
+		{
+			linklist_destory(l,deepDeleteFlag);
+		}
+	}
 }
 

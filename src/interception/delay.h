@@ -11,6 +11,7 @@ extern "C"
 	void delay_table_init();
 	void delay_table_add(uint64_t key,struct receiver_msg_st *);
 	void delay_table_send(uint64_t key,int fd);
+	 void delay_table_destroy();
 
 #ifdef __cplusplus
 }

@@ -23,8 +23,20 @@ static struct receiver_msg_st * copy_message(struct receiver_msg_st *msg){
 void delay_table_init(){
 	table = hash_create(65536);
 	hash_set_timeout(table,10);
+	table->deepDeleteFlag=1;
 }
 
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  delay_table_destroy
+ *  Description:  destroy delay table
+ * =====================================================================================
+ */
+void delay_table_destroy()
+{
+	hash_destory(table);
+}
 
 /* 
  * ===  FUNCTION  ======================================================================
@@ -60,7 +72,10 @@ void delay_table_send(uint64_t key,int fd){
 		lnodeptr first = linklist_pop_first(msg_list);
 		struct receiver_msg_st *msg = (first->data);
 		msg_receiver_send(fd,msg);
-		free(msg);
+		if(msg!=NULL)
+		{
+			free(msg);
+		}
 		lnode_free(first);
 	}
 }

@@ -141,19 +141,18 @@ void interception_run(){
 /* 
  * ===  FUNCTION  ======================================================================
  *         Name:  interception_over
- *  Description:  clean all fds for interception over
+ *  Description:  interception over
  * =====================================================================================
  */
-	void interception_over(){
-		if(firewall_sock!=-1)
-		{
-			close(firewall_sock);
-		}
-
-		if(msg_listen_sock!=-1)
-		{
-			close(msg_listen_sock);
-		}
-		exit(0);
+void interception_over(){
+	if(firewall_sock!=-1){
+		close(firewall_sock);
 	}
+
+	if(msg_listen_sock!=-1){
+		close(msg_listen_sock);
+	}
+	status_destroy();
+	delay_table_destroy();
+}
 

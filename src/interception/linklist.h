@@ -22,7 +22,7 @@ extern "C"
 	void lnode_free(lnodeptr p);
 
 	linklist * linklist_create();
-	void linklist_destory(linklist *l);
+	void linklist_destory(linklist *l,int needDeleteDeep);
 	void linklist_append(linklist *l,lnodeptr );
 	void linklist_push(linklist *l,lnodeptr p);
 	lnodeptr linklist_remove(lnodeptr node);
