@@ -25,6 +25,7 @@ extern "C"
 	typedef struct hash_table_st{
 		uint32_t size;
 		int      timeout;
+		int 	 deepDeleteFlag;
 		struct linklist **lists;
 	}hash_table;
 

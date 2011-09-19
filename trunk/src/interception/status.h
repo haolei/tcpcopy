@@ -10,6 +10,8 @@ extern "C"
 	void status_update(struct iphdr *ip_header);
 	void status_add(uint32_t ,uint16_t,int);
 	void status_del(uint32_t ,uint16_t);
+	void status_destroy();
+
 
 #ifdef __cplusplus
 }
