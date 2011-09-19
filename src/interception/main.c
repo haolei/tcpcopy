@@ -10,6 +10,7 @@
 static void signal_handler(int sig)
 {
 	logInfo(LOG_INFO,"set signal handler:%d",sig);
+	endLogInfo();
 	interception_over();
 }
 
@@ -22,6 +23,7 @@ static void set_signal_handler(){
 }
 
 int main(){
+	initLogInfo();
 	set_signal_handler();
 	interception_init();
 	interception_run();
