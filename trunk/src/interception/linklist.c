@@ -5,7 +5,7 @@
 
 lnodeptr lnode_malloc(void *data){
 	lnodeptr p;
-	if((p = (lnodeptr)malloc(sizeof(struct linknode))) == NULL){
+	if(NULL == (p = (lnodeptr)malloc(sizeof(struct linknode)))){
 		return NULL;
 	}
 	p->data = data;

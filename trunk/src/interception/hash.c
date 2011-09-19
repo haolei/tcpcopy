@@ -1,20 +1,5 @@
-/*
- * =====================================================================================
- *
- *       Filename:  hash.c
- *       Compiler:  gcc
- *
- *         Author:  wangbo@corp.netease.com
- *
- *      CopyRight:  Copyright (c) netease
- *
- *    Description: 
- *
- *        Created:  2010-07-12 19:09:36
- * =====================================================================================
- */
-
 #include "hash.h"
+#include "../log/log.h"
 
 static hash_node *hash_node_malloc(uint64_t key,void *data){
 	hash_node * newnode = (hash_node *)malloc(sizeof(hash_node));
@@ -53,6 +38,7 @@ hash_table *hash_create(size_t size){
 
 static void delete_timeout(hash_table *table,linklist *l){
 	time_t  nowtime = time(NULL);
+	int count=0;
 	while(1){
 		lnodeptr node = linklist_tail(l);
 		if(! node ){
@@ -60,11 +46,15 @@ static void delete_timeout(hash_table *table,linklist *l){
 		}
 		hash_node *hnode = (hash_node *)node->data;
 		if(hnode->access_time+table->timeout < nowtime){
-			linklist_pop_tail(l);
+			lnodeptr tail=linklist_pop_tail(l);
+			free(tail->data);
+			free(tail);
+			count++;
 		}else{
 			break;
 		}
 	}
+	logInfo(LOG_NOTICE,"delete timeout:%d",count);
 }
 static inline linklist * get_linklist(hash_table *table,uint64_t key){
 	size_t slot = get_slot(key,table->size);
