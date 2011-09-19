@@ -445,6 +445,7 @@ void session_st::sendFakedSynAckToBackend(struct iphdr* ip_header,
 	memset(fake_ack_buf,40,0);
 	struct iphdr *ip_header2 = (struct iphdr *)fake_ack_buf;
 	struct tcphdr *tcp_header2 = (struct tcphdr *)(fake_ack_buf+20);
+	logInfo(LOG_NOTICE,"sendFakedSynAckToBackend");
 	ip_header2->version = 4;
 	ip_header2->ihl = 5;
 	ip_header2->tot_len = htons(40);
