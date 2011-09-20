@@ -172,7 +172,7 @@ void delay_table_destroy()
 
 		logInfo(LOG_NOTICE,"destroy msg list items:%d,free:%d,total:%d",
 				count,fCount,mCount);
-		logInfo(LOG_NOTICE,"create linklist:%d,delay del:%d,destroy list:%d",
+		logInfo(LOG_NOTICE,"create msg list:%d,delayDel:%d,destroyList:%d",
 				lCount,delayDel,lDestroy);
 		hash_destory(table);
 		free(table);
