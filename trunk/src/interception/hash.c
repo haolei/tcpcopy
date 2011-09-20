@@ -59,6 +59,12 @@ static void delete_timeout(hash_table *table,linklist *l){
 	}
 }
 
+static inline linklist * get_linklist(hash_table *table,uint64_t key){
+	size_t slot = get_slot(key,table->size);
+	linklist *l = table->lists[slot];
+	return l;
+}
+
 static lnodeptr  hash_find_node(hash_table *table,uint64_t key){
 	linklist *l = get_linklist(table,key);
 	delete_timeout(table,l);

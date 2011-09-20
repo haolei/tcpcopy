@@ -51,7 +51,7 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_interception_OBJECTS = status.$(OBJEXT) delay.$(OBJEXT) \
+am_interception_OBJECTS = router.$(OBJEXT) delay.$(OBJEXT) \
 	hash.$(OBJEXT) interception.$(OBJEXT) linklist.$(OBJEXT) \
 	nl_firewall.$(OBJEXT) nl.$(OBJEXT) main.$(OBJEXT)
 interception_OBJECTS = $(am_interception_OBJECTS)
@@ -171,7 +171,7 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 interception_SOURCES = \
-					 status.c status.h\
+					 router.c router.h\
 					 delay.c delay.h\
 					 hash.c hash.h\
 					 interception.c interception.h\
@@ -263,7 +263,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nl_firewall.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/status.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/router.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
