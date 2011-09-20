@@ -22,7 +22,7 @@ static struct receiver_msg_st * copy_message(struct receiver_msg_st *msg){
  * =====================================================================================
  */
 void delay_table_init(){
-	//we support 64k delayed connections
+	//we support 64k slots here
 	table = hash_create(1024*64);
 	hash_set_timeout(table,30);
 	strcpy(table->name,"delay-table");
@@ -84,6 +84,22 @@ void delay_table_destroy()
 	if(table!=NULL)
 	{
 		logInfo(LOG_NOTICE,"destroy delayed table");
+		uint32_t i=0;
+		for(;i<table->size;i++)
+		{
+			linklist* list=table->lists[i];
+			lnodeptr node = linklist_first(list);
+			while(node){
+				hash_node *hnode = (hash_node *)node->data;
+				if(hnode->data!=NULL)
+				{
+					linklist *msg_list=(linklist *)hnode->data;
+					linklist_destory(msg_list);
+				}	
+				node = linklist_get_next(list,node);
+			}
+
+		}
 		hash_destory(table);
 		free(table);
 		table=NULL;

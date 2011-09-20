@@ -73,6 +73,7 @@ static lnodeptr  hash_find_node(hash_table *table,uint64_t key){
 		hash_node *hnode = (hash_node *)node->data;
 		if(hnode->key == key){
 			hnode->access_time = time(NULL);
+			//put the lastest item to the head of the link list
 			linklist_remove(node);
 			linklist_push(l,node);
 			return node;
@@ -128,14 +129,13 @@ void hash_destory(hash_table *table)
 {
 	uint32_t index=0;
 	linklist* l=NULL;
-	int deepDeleteFlag=table->deepDeleteFlag;
 	int count=0;
 	for(;index<table->size;index++)
 	{
 		l=table->lists[index];
 		if(l!=NULL)
 		{
-			count+=linklist_destory(l,deepDeleteFlag);
+			count+=linklist_destory(l);
 		}
 	}
 	free(table->lists);
