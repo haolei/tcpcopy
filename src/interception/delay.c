@@ -4,6 +4,7 @@
 
 static hash_table  *table;
 static int mCount;
+static int lCount;
 static int fCount;
 static struct receiver_msg_st * copy_message(struct receiver_msg_st *msg){
 	struct receiver_msg_st *cmsg = NULL;
@@ -29,6 +30,8 @@ void delay_table_init(){
 	strcpy(table->name,"delay-table");
 	table->deepDeleteFlag=1;
 	logInfo(LOG_NOTICE,"create table %s,size:%u",table->name,table->size);
+	mCount=0;
+	fCount=0;
 }
 
 
@@ -43,6 +46,7 @@ void delay_table_add(uint64_t key,struct receiver_msg_st *msg){
 	struct receiver_msg_st *cmsg = copy_message(msg);
 	lnodeptr pnode = lnode_malloc((void *)cmsg);
 	if(NULL == msg_list){
+		lCount++;
 		msg_list = linklist_create();
 		hash_add(table,key,msg_list);
 	}
@@ -126,6 +130,7 @@ void delay_table_destroy()
 
 		logInfo(LOG_NOTICE,"destroy msg list items:%d,free:%d,total:%d",
 				count,fCount,mCount);
+		logInfo(LOG_NOTICE,"create linklist:%d",lCount);
 		hash_destory(table);
 		free(table);
 		table=NULL;
