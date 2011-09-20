@@ -6,6 +6,8 @@ static hash_table  *table;
 static int mCount;
 static int lCount;
 static int fCount;
+static int delayDel;
+
 static struct receiver_msg_st * copy_message(struct receiver_msg_st *msg){
 	struct receiver_msg_st *cmsg = NULL;
 	cmsg=(struct receiver_msg_st *)malloc(sizeof(struct receiver_msg_st));
@@ -32,6 +34,8 @@ void delay_table_init(){
 	logInfo(LOG_NOTICE,"create table %s,size:%u",table->name,table->size);
 	mCount=0;
 	fCount=0;
+	lCount=0;
+	delayDel=0;
 }
 
 
@@ -49,6 +53,9 @@ void delay_table_add(uint64_t key,struct receiver_msg_st *msg){
 		lCount++;
 		msg_list = linklist_create();
 		hash_add(table,key,msg_list);
+	}else
+	{
+
 	}
 	mCount++;
 	linklist_append(msg_list,pnode);
@@ -92,6 +99,7 @@ void delay_table_del(uint64_t key){
 		{
 			free(msg);
 		}
+		delayDel++;
 		fCount++;
 		lnode_free(first);
 	}
@@ -112,6 +120,7 @@ void delay_table_destroy()
 		logInfo(LOG_NOTICE,"destroy delayed table");
 		uint32_t i=0;
 		int count=0;
+		int lDestroy=0;
 		for(;i<table->size;i++)
 		{
 			linklist* list=table->lists[i];
@@ -122,6 +131,7 @@ void delay_table_destroy()
 				{
 					linklist *msg_list=(linklist *)hnode->data;
 					count+=linklist_destory(msg_list);
+					lDestroy++;
 				}	
 				hnode->data=NULL;
 				node = linklist_get_next(list,node);
@@ -130,7 +140,8 @@ void delay_table_destroy()
 
 		logInfo(LOG_NOTICE,"destroy msg list items:%d,free:%d,total:%d",
 				count,fCount,mCount);
-		logInfo(LOG_NOTICE,"create linklist:%d",lCount);
+		logInfo(LOG_NOTICE,"create linklist:%d,delay del:%d,destroy list:%d",
+				lCount,delayDel,lDestroy);
 		hash_destory(table);
 		free(table);
 		table=NULL;
