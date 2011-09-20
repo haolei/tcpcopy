@@ -129,14 +129,17 @@ void hash_destory(hash_table *table)
 	uint32_t index=0;
 	linklist* l=NULL;
 	int deepDeleteFlag=table->deepDeleteFlag;
+	int count=0;
 	for(;index<table->size;index++)
 	{
 		l=table->lists[index];
 		if(l!=NULL)
 		{
-			linklist_destory(l,deepDeleteFlag);
+			count+=linklist_destory(l,deepDeleteFlag);
 		}
 	}
 	free(table->lists);
+	logInfo(LOG_NOTICE,"destroy items %d in table name:%s",
+			count,table->name);
 }
 

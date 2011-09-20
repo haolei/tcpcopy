@@ -29,23 +29,27 @@ linklist * linklist_create(){
 	return l;
 }
 
-static void linklist_clear(linklist *l,int needDeleteDeep){
+static int linklist_clear(linklist *l,int needDeleteDeep){
 	lnodeptr p = l->head.next;
 	lnodeptr pnext;
+	int count=0;
 	while(p !=& l->head){
 		pnext = p->next;
 		if(needDeleteDeep&&p->data!=NULL)
 		{
 			free(p->data);
 		}
+		count++;
 		lnode_free(p);
 		p = pnext;
 	}
+	return count;
 }
 
-void linklist_destory(linklist *l,int needDeleteDeep){
-	linklist_clear(l,needDeleteDeep);
+int linklist_destory(linklist *l,int needDeleteDeep){
+	int count=linklist_clear(l,needDeleteDeep);
 	free(l);
+	return count;
 }
 
 void linklist_append(linklist *l,lnodeptr p){
