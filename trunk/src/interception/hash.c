@@ -37,29 +37,7 @@ hash_table *hash_create(size_t size){
 	return htable;
 }
 
-static void delete_timeout(hash_table *table,linklist *l){
-	time_t  nowtime = time(NULL);
-	int deepDeleteFlag=table->deepDeleteFlag;
-	while(1){
-		lnodeptr node = linklist_tail(l);
-		if(! node ){
-			break;
-		}
-		hash_node *hnode = (hash_node *)node->data;
-		if(hnode->access_time+table->timeout < nowtime){
-			lnodeptr tail=linklist_pop_tail(l);
-			if(deepDeleteFlag&&NULL!=tail->data)
-			{
-				free(tail->data);
-			}
-			free(tail);
-		}else{
-			break;
-		}
-	}
-}
-
-static inline linklist * get_linklist(hash_table *table,uint64_t key){
+linklist * get_linklist(hash_table *table,uint64_t key){
 	size_t slot = get_slot(key,table->size);
 	linklist *l = table->lists[slot];
 	return l;
@@ -67,7 +45,6 @@ static inline linklist * get_linklist(hash_table *table,uint64_t key){
 
 static lnodeptr  hash_find_node(hash_table *table,uint64_t key){
 	linklist *l = get_linklist(table,key);
-	delete_timeout(table,l);
 	lnodeptr node = linklist_first(l);
 	while(node){
 		hash_node *hnode = (hash_node *)node->data;
@@ -109,13 +86,13 @@ void hash_add(hash_table *table,uint64_t key,void *data){
 
 void hash_del(hash_table *table,uint64_t key){
 	lnodeptr node = hash_find_node(table,key);
-	int deepDeleteFlag=table->deepDeleteFlag;
 	if(node != NULL){
 		linklist_remove(node);
-		if(deepDeleteFlag&&node->data!=NULL)
+		if(node->data!=NULL)
 		{
 			free(node->data);
 		}
+		node->data=NULL;
 		lnode_free(node);
 	}
 	return;

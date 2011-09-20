@@ -26,11 +26,11 @@ extern "C"
 		uint32_t size;
 		int      timeout;
 		char     name[64];
-		int 	 deepDeleteFlag;
 		struct linklist **lists;
 	}hash_table;
 
 	hash_table * hash_create(size_t size);
+	linklist * get_linklist(hash_table *table,uint64_t key);
 	void hash_set_timeout(hash_table *,int);
 	void hash_destory(hash_table *);
 	void hash_add(hash_table *,uint64_t ,void *);
