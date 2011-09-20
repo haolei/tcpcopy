@@ -2,7 +2,7 @@
 #include "../event/select_server.h"
 #include "nl_firewall.h"
 #include "interception.h"
-#include "status.h"
+#include "router.h"
 #include "delay.h"
 
 static  int firewall_sock;
@@ -88,7 +88,7 @@ static void interception_process(int fd){
 	}else if(fd == firewall_sock){
 		int packet_id=0;
 		struct iphdr *ip_header = nl_firewall_recv(firewall_sock,&packet_id);
-		status_update(ip_header);
+		router_update(ip_header);
 		recvFromTest++;
 		{
 			formatOutput(LOG_DEBUG,ip_header);
@@ -99,9 +99,9 @@ static void interception_process(int fd){
 		struct copyer_msg_st *c_msg = msg_receiver_recv(fd);
 		if(c_msg){
 			if(c_msg->type == CLIENT_ADD){
-				status_add(c_msg->client_ip,c_msg->client_port,fd);
+				router_add(c_msg->client_ip,c_msg->client_port,fd);
 			}else if(c_msg->type == CLIENT_DEL){
-				status_del(c_msg->client_ip,c_msg->client_port);
+				router_del(c_msg->client_ip,c_msg->client_port);
 			}
 		}else{
 			close(fd);
@@ -118,7 +118,7 @@ static void interception_process(int fd){
  */
 void interception_init(){
 	delay_table_init();
-	status_init();
+	router_init();
 	select_sever_set_callback(interception_process);
 	msg_listen_sock = msg_receiver_init();
 	select_sever_add(msg_listen_sock);
@@ -152,7 +152,7 @@ void interception_over(){
 	if(msg_listen_sock!=-1){
 		close(msg_listen_sock);
 	}
-	status_destroy();
+	router_destroy();
 	delay_table_destroy();
 }
 

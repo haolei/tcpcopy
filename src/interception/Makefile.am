@@ -1,6 +1,6 @@
 bin_PROGRAMS=interception
 interception_SOURCES=\
-					 status.c status.h\
+					 router.c router.h\
 					 delay.c delay.h\
 					 hash.c hash.h\
 					 interception.c interception.h\
