@@ -3,7 +3,8 @@
 #include "../log/log.h"
 
 static hash_table  *table;
-
+static int mCount;
+static int fCount;
 static struct receiver_msg_st * copy_message(struct receiver_msg_st *msg){
 	struct receiver_msg_st *cmsg = NULL;
 	cmsg=(struct receiver_msg_st *)malloc(sizeof(struct receiver_msg_st));
@@ -41,6 +42,7 @@ void delay_table_add(uint64_t key,struct receiver_msg_st *msg){
 	linklist *msg_list =(linklist *)hash_find(table,key);
 	struct receiver_msg_st *cmsg = copy_message(msg);
 	lnodeptr pnode = lnode_malloc((void *)cmsg);
+	mCount++;
 	if(msg_list == NULL){
 		msg_list = linklist_create();
 		hash_add(table,key,msg_list);
@@ -69,6 +71,7 @@ void delay_table_send(uint64_t key,int fd){
 		{
 			free(msg);
 		}
+		fCount++;
 		lnode_free(first);
 	}
 }
@@ -103,7 +106,8 @@ void delay_table_destroy()
 			}
 
 		}
-		logInfo(LOG_NOTICE,"destroy msg list items:%d",count);
+		logInfo(LOG_NOTICE,"destroy msg list items:%d,free:%d,total:%d",
+				count,fCount,mCount);
 		hash_destory(table);
 		free(table);
 		table=NULL;
