@@ -7,6 +7,8 @@ static int mCount;
 static int lCount;
 static int fCount;
 static int delayDel;
+static int lDestroy;
+static int count;
 
 static struct receiver_msg_st * copy_message(struct receiver_msg_st *msg){
 	struct receiver_msg_st *cmsg = NULL;
@@ -30,14 +32,45 @@ void delay_table_init(){
 	table = hash_create(1024*64);
 	hash_set_timeout(table,30);
 	strcpy(table->name,"delay-table");
-	table->deepDeleteFlag=1;
 	logInfo(LOG_NOTICE,"create table %s,size:%u",table->name,table->size);
 	mCount=0;
 	fCount=0;
 	lCount=0;
 	delayDel=0;
+	lDestroy=0;
+	count=0;
 }
 
+static void delay_table_delete_obsolete(uint64_t key)
+{
+	linklist *l = get_linklist(table,key);
+	time_t  nowtime = time(NULL);
+	while(1){
+		lnodeptr node = linklist_tail(l);
+		if(! node ){
+			break;
+		}   
+		hash_node *hnode = (hash_node *)node->data;
+		if(hnode->access_time+table->timeout < nowtime){
+			lnodeptr tail=linklist_pop_tail(l);
+			hash_node *hnode = (hash_node *)tail->data;
+			if(NULL!=hnode)
+			{   
+				if(hnode->data!=NULL)
+				{
+					linklist *msg_list=(linklist *)hnode->data;
+					count+=linklist_destory(msg_list);
+					lDestroy++;
+				}
+				hnode->data=NULL;
+			}   
+			tail->data=NULL;
+			free(tail);
+		}else{
+			break;
+		}   
+	} 
+}
 
 /* 
  * ===  FUNCTION  ======================================================================
@@ -46,6 +79,7 @@ void delay_table_init(){
  * =====================================================================================
  */
 void delay_table_add(uint64_t key,struct receiver_msg_st *msg){
+	delay_table_delete_obsolete(key);	
 	linklist *msg_list =(linklist *)hash_find(table,key);
 	struct receiver_msg_st *cmsg = copy_message(msg);
 	lnodeptr pnode = lnode_malloc((void *)cmsg);
@@ -53,9 +87,6 @@ void delay_table_add(uint64_t key,struct receiver_msg_st *msg){
 		lCount++;
 		msg_list = linklist_create();
 		hash_add(table,key,msg_list);
-	}else
-	{
-
 	}
 	mCount++;
 	linklist_append(msg_list,pnode);
@@ -70,6 +101,7 @@ void delay_table_add(uint64_t key,struct receiver_msg_st *msg){
  * =====================================================================================
  */
 void delay_table_send(uint64_t key,int fd){
+	delay_table_delete_obsolete(key);	
 	linklist *msg_list =(linklist *)hash_find(table,key);
 	if(NULL == msg_list){
 		return;	
@@ -88,6 +120,7 @@ void delay_table_send(uint64_t key,int fd){
 }
 
 void delay_table_del(uint64_t key){
+	delay_table_delete_obsolete(key);	
 	linklist *msg_list =(linklist *)hash_find(table,key);
 	if(NULL == msg_list){
 		return;	
@@ -119,8 +152,6 @@ void delay_table_destroy()
 	{
 		logInfo(LOG_NOTICE,"destroy delayed table");
 		uint32_t i=0;
-		int count=0;
-		int lDestroy=0;
 		for(;i<table->size;i++)
 		{
 			linklist* list=table->lists[i];
