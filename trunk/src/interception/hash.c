@@ -39,7 +39,6 @@ hash_table *hash_create(size_t size){
 
 static void delete_timeout(hash_table *table,linklist *l){
 	time_t  nowtime = time(NULL);
-	int count=0;
 	int deepDeleteFlag=table->deepDeleteFlag;
 	while(1){
 		lnodeptr node = linklist_tail(l);
@@ -54,38 +53,15 @@ static void delete_timeout(hash_table *table,linklist *l){
 				free(tail->data);
 			}
 			free(tail);
-			count++;
 		}else{
 			break;
 		}
-	}
-	logInfo(LOG_NOTICE,"table %s,delete timeout:%d",table->name,count);
-}
-static inline linklist * get_linklist(hash_table *table,uint64_t key){
-	size_t slot = get_slot(key,table->size);
-	linklist *l = table->lists[slot];
-	return l;
-}
-
-static time_t lastUpdate;
-static void checkDeleteTimeout(hash_table *table,linklist *l)
-{
-	if(0==lastUpdate)
-	{
-		lastUpdate=time(0);
-	}
-	time_t now=time(0);
-	int diff=now-lastUpdate;
-	if(diff>10)
-	{
-		delete_timeout(table,l);
-		lastUpdate=now;
 	}
 }
 
 static lnodeptr  hash_find_node(hash_table *table,uint64_t key){
 	linklist *l = get_linklist(table,key);
-	checkDeleteTimeout(table,l);
+	delete_timeout(table,l);
 	lnodeptr node = linklist_first(l);
 	while(node){
 		hash_node *hnode = (hash_node *)node->data;

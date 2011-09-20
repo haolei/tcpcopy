@@ -1,20 +1,20 @@
-#ifndef  _TCPCOPY_RECEIVER_STATUS_H_INC
-#define  _TCPCOPY_RECEIVER_STATUS_H_INC
+#ifndef  _TCPCOPY_RECEIVER_ROUTER_H_INC
+#define  _TCPCOPY_RECEIVER_ROUTER_H_INC
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-	void status_init();
-	void status_update(struct iphdr *ip_header);
-	void status_add(uint32_t ,uint16_t,int);
-	void status_del(uint32_t ,uint16_t);
-	void status_destroy();
+	void router_init();
+	void router_update(struct iphdr *ip_header);
+	void router_add(uint32_t ,uint16_t,int);
+	void router_del(uint32_t ,uint16_t);
+	void router_destroy();
 
 
 #ifdef __cplusplus
 }
 #endif
-#endif   /* ----- #ifndef _TCPCOPY_RECEIVER_STATUS_H_INC  ----- */
+#endif   /* ----- #ifndef _TCPCOPY_RECEIVER_ROUTER_H_INC  ----- */
 
