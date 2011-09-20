@@ -1,7 +1,7 @@
 #include "../communication/msg.h"
 #include "../log/log.h"
 #include "hash.h"
-#include "status.h"
+#include "router.h"
 #include "delay.h"
 
 static hash_table *table;
@@ -12,7 +12,7 @@ static inline uint64_t get_key(uint32_t ip,uint16_t port){
 	return value;
 }
 
-void status_init(){
+void router_init(){
 	//we support 256k connections 
 	table = hash_create(1024*256);
 	table->deepDeleteFlag=0;
@@ -21,16 +21,16 @@ void status_init(){
 			table->name,table->size);
 }
 
-void status_del(uint32_t ip,uint16_t port){
+void router_del(uint32_t ip,uint16_t port){
 	hash_del(table,get_key(ip,port));
 }
 
-void status_add(uint32_t ip,uint16_t port,int fd){
+void router_add(uint32_t ip,uint16_t port,int fd){
 	hash_add(table,get_key(ip,port),(void *)(long)fd);
 	delay_table_send(get_key(ip,port),fd);
 }
 
-void status_update(struct iphdr *ip_header){
+void router_update(struct iphdr *ip_header){
 	if(ip_header->protocol != IPPROTO_TCP){
 		return;
 	}
@@ -48,11 +48,11 @@ void status_update(struct iphdr *ip_header){
 
 }
 
-void status_destroy()
+void router_destroy()
 {
 	if(table!=NULL)
 	{
-		logInfo(LOG_NOTICE,"destroy status table");
+		logInfo(LOG_NOTICE,"destroy router table");
 		hash_destory(table);
 		free(table);
 		table=NULL;

@@ -33,23 +33,6 @@ void delay_table_init(){
 
 /* 
  * ===  FUNCTION  ======================================================================
- *         Name:  delay_table_destroy
- *  Description:  destroy delay table
- * =====================================================================================
- */
-void delay_table_destroy()
-{
-	if(table!=NULL)
-	{
-		logInfo(LOG_NOTICE,"destroy delayed table");
-		hash_destory(table);
-		free(table);
-		table=NULL;
-	}
-}
-
-/* 
- * ===  FUNCTION  ======================================================================
  *         Name:  delay_table_add
  *  Description:  add msg to delay table
  * =====================================================================================
@@ -87,6 +70,23 @@ void delay_table_send(uint64_t key,int fd){
 			free(msg);
 		}
 		lnode_free(first);
+	}
+}
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  delay_table_destroy
+ *  Description:  destroy delay table
+ * =====================================================================================
+ */
+void delay_table_destroy()
+{
+	if(table!=NULL)
+	{
+		logInfo(LOG_NOTICE,"destroy delayed table");
+		hash_destory(table);
+		free(table);
+		table=NULL;
 	}
 }
 
