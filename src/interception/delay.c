@@ -63,6 +63,7 @@ static void delay_table_delete_obsolete(uint64_t key)
 					lDestroy++;
 				}
 				hnode->data=NULL;
+				free(hnode);
 			}   
 			tail->data=NULL;
 			free(tail);
