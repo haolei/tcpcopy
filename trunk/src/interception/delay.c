@@ -96,7 +96,9 @@ void delay_table_destroy()
 				{
 					linklist *msg_list=(linklist *)hnode->data;
 					count+=linklist_destory(msg_list);
+					free(msg_list);
 				}	
+				hnode->data=NULL;
 				node = linklist_get_next(list,node);
 			}
 
