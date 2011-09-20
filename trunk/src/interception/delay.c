@@ -85,6 +85,7 @@ void delay_table_destroy()
 	{
 		logInfo(LOG_NOTICE,"destroy delayed table");
 		uint32_t i=0;
+		int count=0;
 		for(;i<table->size;i++)
 		{
 			linklist* list=table->lists[i];
@@ -94,12 +95,13 @@ void delay_table_destroy()
 				if(hnode->data!=NULL)
 				{
 					linklist *msg_list=(linklist *)hnode->data;
-					linklist_destory(msg_list);
+					count+=linklist_destory(msg_list);
 				}	
 				node = linklist_get_next(list,node);
 			}
 
 		}
+		logInfo(LOG_NOTICE,"destroy msg list items:%d",count);
 		hash_destory(table);
 		free(table);
 		table=NULL;
