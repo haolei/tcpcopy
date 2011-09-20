@@ -69,7 +69,6 @@ void linklist_push(linklist *l,lnodeptr p){
 	return;
 }
 
-
 lnodeptr linklist_remove(lnodeptr node){
 	lnodeptr pnext = node->next;
 	lnodeptr pprev = node->prev;

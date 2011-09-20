@@ -42,11 +42,11 @@ void delay_table_add(uint64_t key,struct receiver_msg_st *msg){
 	linklist *msg_list =(linklist *)hash_find(table,key);
 	struct receiver_msg_st *cmsg = copy_message(msg);
 	lnodeptr pnode = lnode_malloc((void *)cmsg);
-	mCount++;
-	if(msg_list == NULL){
+	if(NULL == msg_list){
 		msg_list = linklist_create();
 		hash_add(table,key,msg_list);
 	}
+	mCount++;
 	linklist_append(msg_list,pnode);
 	return;
 }
@@ -74,6 +74,25 @@ void delay_table_send(uint64_t key,int fd){
 		fCount++;
 		lnode_free(first);
 	}
+}
+
+void delay_table_del(uint64_t key){
+	linklist *msg_list =(linklist *)hash_find(table,key);
+	if(NULL == msg_list){
+		return;	
+	}
+	while(! linklist_is_empty(msg_list)){
+		lnodeptr first = linklist_pop_first(msg_list);
+		struct receiver_msg_st *msg = (first->data);
+		if(msg!=NULL)
+		{
+			free(msg);
+		}
+		fCount++;
+		lnode_free(first);
+	}
+	hash_del(table,key);
+	free(msg_list);
 }
 
 /* 
@@ -104,11 +123,11 @@ void delay_table_destroy()
 				node = linklist_get_next(list,node);
 			}
 
+			logInfo(LOG_NOTICE,"destroy msg list items:%d,free:%d,total:%d",
+					count,fCount,mCount);
+			hash_destory(table);
+			free(table);
 		}
-		logInfo(LOG_NOTICE,"destroy msg list items:%d,free:%d,total:%d",
-				count,fCount,mCount);
-		hash_destory(table);
-		free(table);
 		table=NULL;
 	}
 }
