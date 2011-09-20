@@ -122,12 +122,12 @@ void delay_table_destroy()
 				hnode->data=NULL;
 				node = linklist_get_next(list,node);
 			}
-
-			logInfo(LOG_NOTICE,"destroy msg list items:%d,free:%d,total:%d",
-					count,fCount,mCount);
-			hash_destory(table);
-			free(table);
 		}
+
+		logInfo(LOG_NOTICE,"destroy msg list items:%d,free:%d,total:%d",
+				count,fCount,mCount);
+		hash_destory(table);
+		free(table);
 		table=NULL;
 	}
 }

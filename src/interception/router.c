@@ -24,6 +24,7 @@ void router_init(){
 void router_del(uint32_t ip,uint16_t port){
 	uint64_t key=get_key(ip,port);
 	hash_del(table,key);
+	delay_table_del(key);
 }
 
 void router_add(uint32_t ip,uint16_t port,int fd){
