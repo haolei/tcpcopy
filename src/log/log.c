@@ -17,7 +17,7 @@ static char* err_levels[] = {
 
 void initLogInfo()
 {
-	output_level=LOG_NOTICE;
+	output_level=LOG_DEBUG;
 	file=fopen("error.log","a+");
 }
 
@@ -33,7 +33,7 @@ void logInfo(int level,char *fmt, ...)
 			char* timeStr=asctime(localtime(&t));
 			size_t len=strlen(timeStr);
 			timeStr[len-1]=':';
-			fprintf(file,timeStr);
+			fprintf(file,"%s",timeStr);
 			va_start(args, fmt);
 			(void)vfprintf(file, fmt, args);
 			fprintf( file, "\n" );
