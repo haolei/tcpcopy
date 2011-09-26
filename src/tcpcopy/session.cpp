@@ -1,5 +1,6 @@
 #include <map>
 #include <arpa/inet.h>
+#include <stdio.h>
 #include "session.h"
 #include "send.h"
 #include "../communication/msg.h"

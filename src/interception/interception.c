@@ -1,3 +1,4 @@
+#include <limits.h>
 #include "../communication/msg.h"
 #include "../event/select_server.h"
 #include "nl_firewall.h"

@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <netinet/if_ether.h> 
 #include <pthread.h>
+#include <unistd.h>
 
 #include "session.h"
 #include "send.h"
@@ -125,6 +126,7 @@ static void *dispose(void *threadid)
 		char* packet=getPacketFromPool();
 		process(packet);
 	}
+	return NULL;
 }
 
 static void set_nonblock(int socket)

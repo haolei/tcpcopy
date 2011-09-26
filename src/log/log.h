@@ -22,7 +22,7 @@ extern "C"
 #define LOG_DEBUG             8 
 
 	void initLogInfo();
-	void logInfo(int level,char *fmt, ...);
+	void logInfo(int level,const char *fmt, ...);
 	void endLogInfo();
 
 #ifdef __cplusplus
