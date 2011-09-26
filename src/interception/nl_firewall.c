@@ -1,3 +1,5 @@
+#include <limits.h>
+#include <netinet/in.h>
 #include "nl.h"
 #include "nl_firewall.h"
 
