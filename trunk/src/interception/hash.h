@@ -43,6 +43,3 @@ extern "C"
 
 #endif   /* ----- #ifndef _TCPCOPY_HASH_H_INC ----- */
 
-
-
-

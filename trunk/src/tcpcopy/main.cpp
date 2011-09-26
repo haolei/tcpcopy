@@ -339,7 +339,7 @@ int main(int argc ,char **argv)
 		exit(1);
 	}
 	initLogInfo();
-	company_ip=inet_addr("61.135.250.217");
+	company_ip=inet_addr("61.135.255.86");
 	result=retrieveVirtualIPAddress(argv[1]);
 	if(!result)
 	{
