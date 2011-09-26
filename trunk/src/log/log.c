@@ -21,7 +21,7 @@ void initLogInfo()
 	file=fopen("error.log","a+");
 }
 
-void logInfo(int level,char *fmt, ...)
+void logInfo(int level,const char *fmt, ...)
 {
 	va_list args;
 	if(output_level >= level)

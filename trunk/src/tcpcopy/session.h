@@ -6,6 +6,8 @@
 #include <netinet/tcp.h>
 #include <sys/time.h>
 #include <list>
+#include <stdlib.h>
+#include <stdio.h>
 #include <time.h>
 
 typedef struct virtual_ip_addr{

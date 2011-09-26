@@ -1,3 +1,5 @@
+#include <limits.h>
+#include <netinet/in.h>
 #include "nl.h"
 #include "../log/log.h"
 

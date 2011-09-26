@@ -2,7 +2,7 @@
 #define  _TCPCOPY_SERVER_H_INC
 
 #ifdef __cplusplus
-extern "C
+extern "C"
 {
 #endif
 
