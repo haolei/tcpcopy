@@ -1,0 +1,4 @@
+#labels tcpcopy,tcp,compile,compilation,problems
+if you have compilation problems,please svn checkout http://tcpcopy.googlecode.com/svn/trunk/ tcpcopy.
+
+if you still have problems,please email to me.
