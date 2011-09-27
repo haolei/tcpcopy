@@ -341,7 +341,7 @@ int main(int argc ,char **argv)
 		exit(1);
 	}
 	initLogInfo();
-	company_ip=inet_addr("61.135.250.217");
+	sample_ip=inet_addr("61.135.250.217");
 	result=retrieveVirtualIPAddress(argv[1]);
 	if(!result)
 	{
