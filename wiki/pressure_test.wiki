@@ -7,17 +7,17 @@
 
 12机器：
 2396 adrun     15   0  119m  75m  736 S 22.0  3.7 378:35.27 asyn_server  
-2083 root      15   0 57496  33m 1080 R 11.6  1.7   4:21.76 tcpcopy 
+2083 root        15   0 57496  33m 1080 R 11.6  1.7   4:21.76 tcpcopy 
 
 13机器：
-11124 adrun     15   0  200m 153m  744 S 18.0  7.6 632:48.91 asyn_server   
+11124 adrun   15   0  200m 153m  744 S 18.0  7.6 632:48.91 asyn_server   
 30622 root      15   0 46496  22m 1076 S 12.0  1.1   6:29.23 tcpcopy  
 
 14机器：
-16855 adrun     15   0 99.0m  55m  744 S 19.6  2.8 623:07.56 asyn_server 
+16855 adrun  15   0 99.0m  55m  744 S 19.6  2.8 623:07.56 asyn_server 
 3255 root      15   0 54364  30m 1076 S 14.0  1.5   6:25.76 tcpcopy  	
 
 15机器：
-17818 adrun     15   0  112m  68m  744 S 17.0  3.4 620:55.22 asyn_server  
+17818 adrun  15   0  112m  68m  744 S 17.0  3.4 620:55.22 asyn_server  
 3793 root      15   0 78604  53m 1076 S 11.3  2.7   5:56.67 tcpcopy
 }}}
