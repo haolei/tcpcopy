@@ -42,7 +42,7 @@ bin_PROGRAMS = tcpcopy$(EXEEXT)
 subdir = src/tcpcopy
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -179,7 +179,6 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 tcpcopy_SOURCES = \
 				address.c address.h\
-				header.h\
 				send.cpp send.h\
 				session.cpp session.h\
 				main.cpp

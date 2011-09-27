@@ -2,31 +2,27 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(tcpcopy, 0.2, wangbin579@gmail.com)
+AC_INIT(tcpcopy, 0.1, wangbin579@gmail.com)
 AC_CONFIG_SRCDIR([src/interception/main.c])
 AC_CONFIG_HEADER([config.h])
 
 
-AM_INIT_AUTOMAKE(tcpcopy,0.2)
+AM_INIT_AUTOMAKE(tcpcopy,0.1)
 
-${CFLAGS=" -g -Werror -Wall  -Wextra"}
-${CXXFLAGS=" -g -Werror -Wall  -Wextra"}
 
 # Checks for programs.
-AC_PROG_CXX
-AC_PROG_CC
 AC_PROG_LN_S
+AC_PROG_MAKE_SET
 
 # Checks for libraries.
 
 AC_PROG_LIBTOOL
 AM_PROG_LIBTOOL
-# FIXME: Replace `main' with a function in `-lm':
-#AC_CHECK_LIB([m], [main])
-# FIXME: Replace `main' with a function in `-ltbb':
-#AC_CHECK_LIB([tbb], [main])
-# FIXME: Replace `main' with a function in `-ltbb_debug':
-#AC_CHECK_LIB([tbb_debug], [main])
+
+AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug],[compile with debug support]),,enable_debug=no)
+if test "x$enable_debug" = "xyes";then
+	AC_DEFINE(TC_DEBUG, 1, [Define if we're using X Session Management.])
+fi
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -60,3 +56,4 @@ src/communication/Makefile
 src/tcpcopy/Makefile
 src/event/Makefile
 ])
+

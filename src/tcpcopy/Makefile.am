@@ -1,7 +1,6 @@
 bin_PROGRAMS=tcpcopy
 tcpcopy_SOURCES=\
 				address.c address.h\
-				header.h\
 				send.cpp send.h\
 				session.cpp session.h\
 				main.cpp
