@@ -41,7 +41,7 @@ host_triplet = @host@
 subdir = src/communication
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -50,7 +50,7 @@ CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
 libmsg_a_AR = $(AR) $(ARFLAGS)
-libmsg_a_LIBADD =
+libmsg_a_DEPENDENCIES = ../log/liblog.a
 am_libmsg_a_OBJECTS = msg.$(OBJEXT)
 libmsg_a_OBJECTS = $(am_libmsg_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -170,7 +170,7 @@ noinst_LIBRARIES = libmsg.a
 libmsg_a_SOURCES = \
 				  msg.h msg.c
 
-interception_LDADD = \
+libmsg_a_LIBADD = \
 				   ../log/liblog.a
 
 all: all-am
