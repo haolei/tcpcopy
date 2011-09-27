@@ -21,4 +21,25 @@
 17818 adrun    15   0  112m  68m  744 S 17.0  3.4 620:55.22 asyn_server
 3793 root      15   0 78604  53m 1076 S 11.3  2.7   5:56.67 tcpcopy
 
+[wangbin@bgp176-148 logs]$ grep 'Wed 10:36:' access_0914_10.log |wc -l  
+310416
+每秒平均处理5173.6，cpu消耗90%
+
+[wangbin@bgp176-148 logs]$ netstat -n | awk '/^tcp/ {++state[$NF]} END {for(key in state) print key,"\t",state[key]}'
+ESTABLISHED      282
+TIME_WAIT        2179
+
+[wangbin@bgp176-148 logs]$ grep 'Wed 10:3' access_0914_10.log |wc -l                                                 
+3141729
+
+[wangbin@bgp12-13 logs]$ grep 'Wed 10:3' access_0914_10.log |wc -l
+807957
+[wangbin@bgp12-14 logs]$ grep 'Wed 10:3' access_0914_10.log |wc -l
+807954
+[wangbin@bgp12-15 logs]$ grep 'Wed 10:3' access_0914_10.log |wc -l
+807958
+[wangbin@bgp12-12 logs]$ grep 'Wed 10:3' access_0914_10.log |wc -l
+807943
+实际请求数量=(807957+807954+807958+807943)=3231812
+丢失率=(3231812-3141729)/3231812=2.79%
 }}}
