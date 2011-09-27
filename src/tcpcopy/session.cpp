@@ -10,7 +10,7 @@
 using std::map;
 
 uint32_t localhost_ip;
-uint32_t company_ip;
+uint32_t sample_ip;
 uint32_t client_ip;
 virtual_ip_addr local_ips;
 uint32_t remote_ip;
@@ -640,10 +640,8 @@ unsigned char * session_st::copy_ip_packet(struct iphdr *ip_header)
 void session_st::establishConnectionForNoSynPackets(struct iphdr *ip_header,
 		struct tcphdr *tcp_header)
 {
-	bool isOutput=false;
 	if(chosenOutput)
 	{
-		isOutput=true;
 		logInfo(LOG_INFO,"establish conn for already connected conn");
 	}
 	{
@@ -1063,7 +1061,7 @@ bool isPacketNeeded(const char *packet)
 		if(checkLocalIPValid(ip_header->daddr) && 
 				(tcp_header->dest==local_port))
 		{
-			//if(ip_header->saddr==company_ip)
+			//if(ip_header->saddr==sample_ip)
 			{
 				isNeeded=true;
 			}
@@ -1210,7 +1208,7 @@ void process(char *packet)
 			SessIterator iter = sessions.find(value);
 			if(iter != sessions.end())
 			{
-				if(ip_header->saddr==company_ip)
+				if(ip_header->saddr==sample_ip)
 				{
 					iter->second.chosenOutput=true;
 				}
