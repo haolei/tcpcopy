@@ -20,7 +20,7 @@ static void set_sock_no_delay(int sock){
 
 static void formatOutput(int level,struct iphdr *ip_header)
 {
-	if(output_level >= level)
+	if(output_level < level)
 	{
 		return;
 	}
@@ -50,7 +50,7 @@ static void formatOutput(int level,struct iphdr *ip_header)
 }
 
 static int seq =0;
-static unsigned char drop_buffer[128];
+/*static unsigned char drop_buffer[128];
 static int drop_netlink_packet(int packet_id)
 {
 	struct nlmsghdr* nl_header=(struct nlmsghdr*)drop_buffer;
@@ -76,9 +76,8 @@ static int drop_netlink_packet(int packet_id)
 		exit(0);
 	}
 	return 1;
-}
+}*/
 
-static int recvFromTest=0;
 static void interception_process(int fd){
 	if(fd == msg_listen_sock){
 		int newfd = accept(msg_listen_sock,NULL,NULL);	
@@ -90,12 +89,11 @@ static void interception_process(int fd){
 		int packet_id=0;
 		struct iphdr *ip_header = nl_firewall_recv(firewall_sock,&packet_id);
 		router_update(ip_header);
-		recvFromTest++;
 		{
 			formatOutput(LOG_DEBUG,ip_header);
 		}
 		//drop the packet
-		drop_netlink_packet(packet_id);  	
+		//drop_netlink_packet(packet_id);  	
 	}else{
 		struct copyer_msg_st *c_msg = msg_receiver_recv(fd);
 		if(c_msg){
