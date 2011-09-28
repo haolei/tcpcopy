@@ -50,7 +50,7 @@ static void formatOutput(int level,struct iphdr *ip_header)
 }
 
 static int seq =0;
-/*static unsigned char drop_buffer[128];
+static unsigned char drop_buffer[128];
 static int drop_netlink_packet(unsigned long packet_id)
 {
 	struct nlmsghdr* nl_header=(struct nlmsghdr*)drop_buffer;
@@ -76,7 +76,7 @@ static int drop_netlink_packet(unsigned long packet_id)
 		exit(0);
 	}
 	return 1;
-}*/
+}
 
 static void interception_process(int fd){
 	if(fd == msg_listen_sock){
@@ -93,7 +93,7 @@ static void interception_process(int fd){
 			formatOutput(LOG_DEBUG,ip_header);
 		}
 		//drop the packet
-		//drop_netlink_packet(packet_id);  	
+		drop_netlink_packet(packet_id);  	
 	}else{
 		struct copyer_msg_st *c_msg = msg_receiver_recv(fd);
 		if(c_msg){
