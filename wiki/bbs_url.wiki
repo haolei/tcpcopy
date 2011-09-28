@@ -1,2 +1,0 @@
-#labels tcpcopy,hmux,nginx,resin,apache,netlink,raw,socket,http,tcp
-http://groups.google.com/group/163beijing
