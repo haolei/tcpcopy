@@ -11,7 +11,7 @@ extern "C"
 #define FIREWALL_GROUP  0
 
 	int nl_firewall_init();
-	struct iphdr *nl_firewall_recv(int sock,int *packet_id);
+	struct iphdr *nl_firewall_recv(int sock, unsigned long *packet_id);
 
 #ifdef __cplusplus
 }

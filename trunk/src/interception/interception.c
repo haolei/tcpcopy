@@ -51,7 +51,7 @@ static void formatOutput(int level,struct iphdr *ip_header)
 
 static int seq =0;
 /*static unsigned char drop_buffer[128];
-static int drop_netlink_packet(int packet_id)
+static int drop_netlink_packet(unsigned long packet_id)
 {
 	struct nlmsghdr* nl_header=(struct nlmsghdr*)drop_buffer;
 	nl_header->nlmsg_type=IPQM_VERDICT;
@@ -86,7 +86,7 @@ static void interception_process(int fd){
 			select_sever_add(newfd);
 		}
 	}else if(fd == firewall_sock){
-		int packet_id=0;
+		unsigned long packet_id=0;
 		struct iphdr *ip_header = nl_firewall_recv(firewall_sock,&packet_id);
 		router_update(ip_header);
 		{
