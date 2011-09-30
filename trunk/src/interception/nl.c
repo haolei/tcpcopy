@@ -56,6 +56,8 @@ void nl_set_mode(int sock,uint8_t mode,size_t range){
 	req.head.nlmsg_flags = NLM_F_REQUEST;
 	req.head.nlmsg_type = IPQM_MODE;
 	req.head.nlmsg_pid = getpid();
+	//here we drop the packet for default because of verdict in ipq_peer_msg_t
+	//set zero
 	req.body.msg.mode.value = mode;
 	req.body.msg.mode.range = range;
 	struct sockaddr_nl addr;
@@ -80,11 +82,11 @@ void nl_set_mode(int sock,uint8_t mode,size_t range){
 ssize_t nl_recv(int sock,void *buffer,size_t length){
 	ssize_t recvlen = recv(sock,buffer,length,0);
 	if(recvlen <0 ){
-		logInfo(LOG_DEBUG,"recv length less than 0 for netlink");
+		logInfo(LOG_ERR,"recv length less than 0 for netlink");
 		return -1;
 	}
 	if((size_t)recvlen < sizeof(struct nlmsghdr)){
-		logInfo(LOG_DEBUG,"recv length not right for netlink");
+		logInfo(LOG_ERR,"recv length not right for netlink");
 		return -1;
 	}
 	return recvlen;
