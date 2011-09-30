@@ -49,7 +49,7 @@ static void formatOutput(int level,struct iphdr *ip_header)
 
 }
 
-static int seq =0;
+static int seq =1;
 static unsigned char drop_buffer[128];
 static int drop_netlink_packet(unsigned long packet_id)
 {
