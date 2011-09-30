@@ -18,7 +18,8 @@ struct iphdr *nl_firewall_recv(int sock,unsigned long *packet_id){
 	ssize_t normalLen=sizeof(struct ipq_packet_msg)+NLMSG_LENGTH(0);
 	if(len < normalLen)
 	{
-		logInfo(LOG_ERR,"nl recv error");
+		logInfo(LOG_ERR,"nl recv error:%ld",len);
+		logInfo(LOG_ERR,"privilage problems(use root) or other error");
 		fprintf(stderr,"privilage problems(use root) or other error\n");
 		exit(-1);
 	}else
