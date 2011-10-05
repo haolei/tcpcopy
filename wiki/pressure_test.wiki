@@ -1,4 +1,4 @@
-#labels tcpcopy,pressure,test
+#labels tcpcopy,pressure,test,stress
 {{{
 一、2台机器压力测试
 13，14是在线应用服务器，148是测试服务器（148配置和13差不多）
