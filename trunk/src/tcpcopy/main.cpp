@@ -33,7 +33,7 @@ static uint64_t readCounter=0;
 static uint64_t writeCounter=0;
 
 static int raw_sock;
-static int packetsPutNum=0;
+static uint64_t packetsPutNum=0;
 
 /**
  * put one packet to buffered pool
@@ -74,7 +74,7 @@ static void putPacketToPool(const char *packet,int len)
 	pthread_cond_signal(&full);
 	pthread_mutex_unlock (&mutex);
 }
-static int  recvFromPoolPackets=0;
+static uint64_t recvFromPoolPackets=0;
 
 /**
  * get one packet from buffered pool
@@ -101,7 +101,7 @@ static char* getPacketFromPool()
 	pthread_mutex_unlock (&mutex);
 	if(recvFromPoolPackets%10000==0)
 	{
-		logInfo(LOG_INFO,"recv from pool packets:%d,put packets in pool:%d",
+		logInfo(LOG_INFO,"recv from pool packets:%lld,put packets in pool:%lld",
 				recvFromPoolPackets,packetsPutNum);
 	}
 	return recvitem;
@@ -155,8 +155,8 @@ static int init_raw_socket()
 	return sock;
 }
 
-static int rawPackets=0;
-static int rawValidPackets=0;
+static uint64_t rawPackets=0;
+static uint64_t rawValidPackets=0;
 
 /**
  * retrieve raw packets here
@@ -207,7 +207,7 @@ static int retrieve_raw_sockets(int sock)
 		count++;
 		if(rawPackets%10000==0)
 		{
-			printf("receive raw packets:%d,valid :%d,total in pool:%d\n",
+			printf("receive raw packets:%lld,valid :%lld,total in pool:%lld\n",
 					rawPackets,rawValidPackets,packetsPutNum);
 		}
 	}
