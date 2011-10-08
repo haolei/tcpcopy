@@ -126,6 +126,11 @@ void outputPacketForDebug(int level,int flag,struct iphdr *ip_header,
 		logInfo(level,"send buf packet %s:%u-->%s:%u,len %u,seq=%u,ack_seq=%u",
 				sbuf,ntohs(tcp_header->source),dbuf,ntohs(tcp_header->dest),
 				packSize,seq,ack_seq);
+	}else if(FAKE_CLIENT_FLAG==flag)
+	{
+		logInfo(level,"faked client packet %s:%u-->%s:%u,len %u,seq=%u,ack_seq=%u",
+				sbuf,ntohs(tcp_header->source),dbuf,ntohs(tcp_header->dest),
+				packSize,seq,ack_seq);
 	}else if(UNKNOWN_FLAG==flag)
 	{
 		logInfo(level,"unkown packet %s:%u-->%s:%u,len %u,seq=%u,ack_seq=%u",
@@ -428,7 +433,7 @@ void session_st::sendFakedSynToBackend(struct iphdr* ip_header,
 	virtual_next_sequence=tcp_header->seq;
 	unsigned char *data=copy_ip_packet(ip_header2);
 	handshakePackets.push_back(data);
-	outputPacketForDebug(LOG_NOTICE,CLIENT_FLAG,ip_header2,tcp_header2);
+	outputPacketForDebug(LOG_NOTICE,FAKE_CLIENT_FLAG,ip_header2,tcp_header2);
 	logInfo(LOG_DEBUG,"send faked syn to backend,client window:%u",
 			tcp_header2->window);
 	send_ip_packet(true,fake_ip_addr,fake_syn_buf,
@@ -466,7 +471,7 @@ void session_st::sendFakedSynAckToBackend(struct iphdr* ip_header,
 	unsigned char *data=copy_ip_packet(ip_header2);
 	handshakePackets.push_back(data);
 	outputPacketForDebug(LOG_NOTICE,BACKEND_FLAG,ip_header,tcp_header);
-	outputPacketForDebug(LOG_NOTICE,CLIENT_FLAG,ip_header2,tcp_header2);
+	outputPacketForDebug(LOG_NOTICE,FAKE_CLIENT_FLAG,ip_header2,tcp_header2);
 	send_ip_packet(chosenOutput,fake_ip_addr,fake_ack_buf,
 			virtual_next_sequence,&nextSeq);
 	totalSendPackets++;

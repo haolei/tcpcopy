@@ -44,6 +44,7 @@ typedef std::list<unsigned char *>::iterator dataIterator;
 #define	CLIENT_FIN  32
 #define BACKEND_FLAG 0
 #define CLIENT_FLAG 1
+#define FAKE_CLIENT_FLAG 10
 #define SERVER_FLAG 2
 #define UNKNOWN_FLAG 3
 #define SERVER_BACKEND_FLAG 4
