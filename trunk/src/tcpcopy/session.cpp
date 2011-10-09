@@ -501,7 +501,7 @@ void session_st::sendFakedAckToBackend(struct iphdr* ip_header,
 	tcp_header2->ack_seq = virtual_next_sequence;
 	tcp_header2->seq = tcp_header->ack_seq;
 	tcp_header2->window= client_window;
-	logInfo(LOG_INFO,"send faked syn ack to backend,client window:%u",
+	logInfo(LOG_INFO,"send faked ack to backend,client window:%u",
 			tcp_header2->window);
 	send_ip_packet(chosenOutput,fake_ip_addr,fake_ack_buf,
 			virtual_next_sequence,&nextSeq);
