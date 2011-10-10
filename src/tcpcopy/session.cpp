@@ -66,16 +66,19 @@ static int clearTimeoutTcpSessions()
 		}
 		if(p->second.unsend.size()>MAXPACKETS)
 		{
+			logInfo(LOG_WARN,"session has too many unsend packets");
 			sessions.erase(p++);
 			continue;
 		}
 		if(p->second.lostPackets.size()>MAXPACKETS)
 		{
+			logInfo(LOG_WARN,"session has too many lost packets");
 			sessions.erase(p++);
 			continue;
 		}
 		if(p->second.handshakePackets.size()>MAXPACKETS)
 		{
+			logInfo(LOG_WARN,"session has too many handshake packets");
 			sessions.erase(p++);
 			continue;
 		}
