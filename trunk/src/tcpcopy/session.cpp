@@ -49,6 +49,7 @@ static int clearTimeoutTcpSessions()
 	time_t keepaliveBase=time(0)-3600;
 	time_t tmpBase=0;
 	double ratio=100.0*enterCount/(totalRequests+1);
+	const size_t MAXPACKETS=100000;
 	if(ratio<10)
 	{
 		normalBase=keepaliveBase;
@@ -63,7 +64,21 @@ static int clearTimeoutTcpSessions()
 		{
 			tmpBase=normalBase;
 		}
-
+		if(p->second.unsend.size()>MAXPACKETS)
+		{
+			sessions.erase(p++);
+			continue;
+		}
+		if(p->second.lostPackets.size()>MAXPACKETS)
+		{
+			sessions.erase(p++);
+			continue;
+		}
+		if(p->second.handshakePackets.size()>MAXPACKETS)
+		{
+			sessions.erase(p++);
+			continue;
+		}
 		if(p->second.lastUpdateTime<tmpBase)
 		{
 			deleteObsoCount++;
