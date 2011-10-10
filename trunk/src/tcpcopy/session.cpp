@@ -66,18 +66,36 @@ static int clearTimeoutTcpSessions()
 		}
 		if(p->second.unsend.size()>MAXPACKETS)
 		{
+			deleteObsoCount++;
+			if(!p->second.isStatClosed)
+			{
+				p->second.isStatClosed=true;
+				activeCount--;
+			}
 			logInfo(LOG_WARN,"session has too many unsend packets");
 			sessions.erase(p++);
 			continue;
 		}
 		if(p->second.lostPackets.size()>MAXPACKETS)
 		{
+			deleteObsoCount++;
+			if(!p->second.isStatClosed)
+			{
+				p->second.isStatClosed=true;
+				activeCount--;
+			}
 			logInfo(LOG_WARN,"session has too many lost packets");
 			sessions.erase(p++);
 			continue;
 		}
 		if(p->second.handshakePackets.size()>MAXPACKETS)
 		{
+			deleteObsoCount++;
+			if(!p->second.isStatClosed)
+			{
+				p->second.isStatClosed=true;
+				activeCount--;
+			}
 			logInfo(LOG_WARN,"session has too many handshake packets");
 			sessions.erase(p++);
 			continue;
