@@ -43,7 +43,7 @@ static uint64_t totalRequests=0;
  */
 static int clearTimeoutTcpSessions()
 {
-	//we clear old sessions every one minute 
+	//we clear old sessions that is never visited for more than one minute
 	//this may be a problem for keepalive connections
 	time_t normalBase=time(0)-60;
 	time_t keepaliveBase=time(0)-3600;
