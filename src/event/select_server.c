@@ -58,6 +58,7 @@ void select_sever_del(int fd){
 				if(valid_fds[j] > max_fd){
 					max_fd = valid_fds[j];
 				}
+				j++;
 			}
 			fd_nums--;
 			break;
