@@ -50,7 +50,7 @@ CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
 libevent_a_AR = $(AR) $(ARFLAGS)
-libevent_a_LIBADD =
+libevent_a_DEPENDENCIES = ../log/liblog.a
 am_libevent_a_OBJECTS = select_server.$(OBJEXT)
 libevent_a_OBJECTS = $(am_libevent_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -169,6 +169,9 @@ target_alias = @target_alias@
 noinst_LIBRARIES = libevent.a                                                                                                          
 libevent_a_SOURCES = \
 				  select_server.h select_server.c
+
+libevent_a_LIBADD = \
+				 ../log/liblog.a
 
 all: all-am
 

@@ -1,1 +1,1 @@
-SUBDIRS=event log communication interception tcpcopy
+SUBDIRS=log event communication interception tcpcopy
