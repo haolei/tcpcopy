@@ -66,6 +66,7 @@ struct receiver_msg_st * msg_copyer_recv(int sock){
 		ssize_t ret = recv(sock,(char *)&r_msg+len,sizeof(struct receiver_msg_st)-len,0);
 		if(ret == 0){
 			logInfo(LOG_DEBUG,"recv length is zero when in msg_copyer_recv");
+			close(sock);
 			return NULL;
 		}else if(ret == -1){
 			continue;
