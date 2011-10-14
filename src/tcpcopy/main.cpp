@@ -1,3 +1,15 @@
+/*
+ *  tcpcopy - an online replication replication tool
+ *
+ *  Copyright 2011 Netease, Inc.  All rights reserved.
+ *  Use and distribution licensed under the BSD license.  See
+ *  the LICENSE file for full text.
+ *
+ *  Authors:
+ *      bin wang <163.beijing@gmail.com or bwang@corp.netease.com>
+ *      bo  wang <wangbo@corp.netease.com>
+ */
+
 #include <fcntl.h>
 #include <asm/types.h>
 #include <sys/socket.h> 
