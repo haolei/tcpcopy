@@ -730,7 +730,7 @@ void session_st::establishConnectionForClosedConn()
 		ip_header=(struct iphdr*)tmpData;
 		size_t size_ip = ip_header->ihl<<2;
 		struct tcphdr *tcp_header = (struct tcphdr*)((char *)ip_header+size_ip);
-		int sock=address_find_sock(tcp_header->dest);
+		int sock=address_find_sock(local_port);
 		if(-1 == sock)
 		{
 			free(tmpData);
