@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "msg.h"
 #include "../log/log.h"
 

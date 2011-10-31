@@ -1071,15 +1071,6 @@ void session_st::process_recv(struct iphdr *ip_header,
 	}
 }
 
-
-static double getusec()
-{
-	struct timeval tp;
-	gettimeofday(&tp,NULL);
-	double sec=tp.tv_sec*1000000+(1.0*tp.tv_usec);
-	return sec ;
-}
-
 static bool checkPacketPadding(struct iphdr *ip_header,
 		struct tcphdr *tcp_header)
 {
@@ -1162,7 +1153,6 @@ void process(char *packet)
 	uint32_t size_ip;
 	bool reusePort=false;
 	timeCount++;
-	static double timeAdded=0;
 
 	if(timeCount%1000000==0)
 	{
