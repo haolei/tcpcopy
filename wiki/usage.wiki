@@ -7,7 +7,7 @@ if you have multiple ip addresses,then you can use the following method to use t
 ./tcpcopy ip1:ip2:ip3:... port1 destIP destPort
 
 2、if you see msg as the following
-     ip_queue: full at 1024 entries, dropping packets(s)
-     you can change the default ip queue size:
-    echo 4096 > /proc/sys/net/ipv4/ip_queue_maxlen
+ip_queue: full at 1024 entries, dropping packets(s)
+you can change the default ip queue size:
+echo 4096 > /proc/sys/net/ipv4/ip_queue_maxlen
 }}}
