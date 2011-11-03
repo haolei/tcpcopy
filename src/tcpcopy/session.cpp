@@ -33,6 +33,7 @@ static uint64_t totalReconnectForNoSyn=0;
 static uint64_t timeCount=0;
 static uint64_t totalResponses=0;
 static uint64_t totalRequests=0;
+static uint64_t totalNumOfNoRespSession=0;
 
 
 /**
@@ -41,7 +42,7 @@ static uint64_t totalRequests=0;
 void outputPacketForDebug(int level,int flag,struct iphdr *ip_header,
 		struct tcphdr *tcp_header)
 {
-	if(output_level < level)
+	if(global_out_level < level)
 	{
 		return;
 	}
@@ -328,7 +329,7 @@ bool session_st::checkSendDeadRequests()
 {
 	time_t now=time(0);
 	int diff=now-lastResponseDispTime;
-	//it will wait for 3 seconds
+	/* it will wait for 3 seconds */
 	if(diff <= 3)
 	{
 		return false;
@@ -475,6 +476,18 @@ void session_st::save_header_info(struct iphdr *ip_header,
 	tcp_header->window=65535;
 }
 
+void session_st::outputPacket(int level,int flag,struct iphdr *ip_header,
+		struct tcphdr *tcp_header)
+{
+	if(logLevel!=global_out_level)
+	{
+		outputPacketForDebug(LOG_WARN,flag,ip_header,tcp_header);
+	}else
+	{
+		outputPacketForDebug(level,flag,ip_header,tcp_header);
+	}
+}
+
 /**
  * send faked syn packet for backend for intercepting already connected packets
  */
@@ -489,7 +502,7 @@ void session_st::sendFakedSynToBackend(struct iphdr* ip_header,
 	struct tcphdr *tcp_header2 = (struct tcphdr *)(fake_syn_buf+20);
 
 	logInfo(LOG_NOTICE,"sendFakedSynToBackend");
-	outputPacketForDebug(LOG_NOTICE,CLIENT_FLAG,ip_header,tcp_header);
+	outputPacket(LOG_NOTICE,CLIENT_FLAG,ip_header,tcp_header);
 	ip_header2->version = 4;
 	ip_header2->ihl = 5;
 	ip_header2->tot_len = htons(FAKE_SYN_BUF_SIZE);
@@ -508,7 +521,7 @@ void session_st::sendFakedSynToBackend(struct iphdr* ip_header,
 	virtual_next_sequence=tcp_header->seq;
 	unsigned char *data=copy_ip_packet(ip_header2);
 	handshakePackets.push_back(data);
-	outputPacketForDebug(LOG_NOTICE,FAKE_CLIENT_FLAG,ip_header2,tcp_header2);
+	outputPacket(LOG_NOTICE,FAKE_CLIENT_FLAG,ip_header2,tcp_header2);
 	logInfo(LOG_DEBUG,"send faked syn to backend,client window:%u",
 			tcp_header2->window);
 	send_ip_packet(fake_ip_addr,fake_syn_buf,
@@ -544,8 +557,8 @@ void session_st::sendFakedSynAckToBackend(struct iphdr* ip_header,
 	tcp_header2->window= 65535;
 	unsigned char *data=copy_ip_packet(ip_header2);
 	handshakePackets.push_back(data);
-	outputPacketForDebug(LOG_NOTICE,BACKEND_FLAG,ip_header,tcp_header);
-	outputPacketForDebug(LOG_NOTICE,FAKE_CLIENT_FLAG,ip_header2,tcp_header2);
+	outputPacket(LOG_NOTICE,BACKEND_FLAG,ip_header,tcp_header);
+	outputPacket(LOG_NOTICE,FAKE_CLIENT_FLAG,ip_header2,tcp_header2);
 	send_ip_packet(fake_ip_addr,fake_ack_buf,
 			virtual_next_sequence,&nextSeq);
 }
@@ -615,7 +628,7 @@ void session_st::sendFakedFinToBackend(struct iphdr* ip_header,
 void session_st::update_virtual_status(struct iphdr *ip_header,
 		struct tcphdr* tcp_header)
 {
-	outputPacketForDebug(LOG_DEBUG,BACKEND_FLAG,ip_header,tcp_header);
+	outputPacket(LOG_DEBUG,BACKEND_FLAG,ip_header,tcp_header);
 	if( tcp_header->rst)
 	{
 		reset_flag = true;
@@ -626,7 +639,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 	uint32_t ack=ntohl(tcp_header->ack_seq);
 	if(ack > nextSeq)
 	{
-		logInfo(LOG_WARN,"ack from backend is more than nextSeq");
+		logInfo(LOG_NOTICE,"ack from backend is more than nextSeq");
 		nextSeq=ack;
 	}
 	if( tcp_header->syn)
@@ -676,16 +689,20 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 	uint32_t size_tcp = tcp_header->doff<<2;
 	uint32_t contSize=tot_len-size_tcp-size_ip;
 	uint32_t next_seq = htonl(ntohl(tcp_header->seq)+contSize);
+	time_t current;
 	
 	//it is nontrivial to check if the packet is the last packet of response
 	//the following is not 100 percent right here
 	if(contSize>0)
 	{
+		current=time(0);
+		respContentPackets++;
+		lastRecvRespContentTime=current;
 		virtual_next_sequence =next_seq;
 		sendFakedAckToBackend(ip_header,tcp_header);
 
 		isPartResponse=true;
-		if(tot_len==RESPONSE_MTU)
+		if(tot_len==DEFAULT_RESPONSE_MTU)
 		{
 			return;
 		}else
@@ -701,7 +718,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 				virtual_next_sequence =next_seq;
 				virtual_status = SEND_RESPONSE_CONFIRM;
 				responseReceived++;
-				lastResponseDispTime=time(0);
+				lastResponseDispTime=current;
 				sendReservedPackets();
 				return;
 			}
@@ -735,7 +752,7 @@ void session_st::establishConnectionForNoSynPackets(struct iphdr *ip_header,
 	if(-1 == sock)
 	{
 		logInfo(LOG_WARN,"sock is invalid in est Conn for NoSynPackets");
-		outputPacketForDebug(LOG_WARN,CLIENT_FLAG,ip_header,tcp_header);
+		outputPacket(LOG_WARN,CLIENT_FLAG,ip_header,tcp_header);
 		return;
 	}
 	int result=msg_copyer_send(sock,ip_header->saddr,
@@ -775,7 +792,7 @@ void session_st::establishConnectionForClosedConn()
 		{
 			free(tmpData);
 			logInfo(LOG_WARN,"sock is invalid in establishConnForClosedConn");
-			outputPacketForDebug(LOG_NOTICE,CLIENT_FLAG,ip_header,tcp_header);
+			outputPacket(LOG_NOTICE,CLIENT_FLAG,ip_header,tcp_header);
 			return;
 		}
 		if(0 == fake_ip_addr)
@@ -819,7 +836,7 @@ void session_st::establishConnectionForClosedConn()
 void session_st::process_recv(struct iphdr *ip_header,
 		struct tcphdr *tcp_header)
 {
-	outputPacketForDebug(LOG_DEBUG,CLIENT_FLAG,ip_header,tcp_header);
+	outputPacket(LOG_DEBUG,CLIENT_FLAG,ip_header,tcp_header);
 	local_dest_ip_addr=ip_header->daddr;
 	if(0 == fake_ip_addr)
 	{
@@ -897,6 +914,33 @@ void session_st::process_recv(struct iphdr *ip_header,
 
 	uint32_t tmpLastAck=lastAck;
 	bool isNewRequest=false;
+
+	if(contSize>0)
+	{
+		reqContentPackets++;
+		time_t current=time(0);
+		double diff=current-lastRecvRespContentTime;
+		//if the sesssion recv no response for more than 5 min
+		//then enter the suicide process
+		if(diff > 300)
+		{
+			logLevel=LOG_DEBUG;
+			logInfo(LOG_WARN,"no resp from back,req:%u,resp:%u,cont size:%u",
+					reqContentPackets,respContentPackets,contSize);
+			totalNumOfNoRespSession++;
+			if(0 == baseReqContentPackets)
+			{
+				baseReqContentPackets=reqContentPackets;
+				outputPacket(LOG_DEBUG,CLIENT_FLAG,ip_header,tcp_header);
+			}
+			double diffReqCont=reqContentPackets-baseReqContentPackets;
+			if(diffReqCont>100)
+			{
+				over_flag=true;
+				return;
+			}
+		}
+	}
 	//data packet or the third packet
 	if(virtual_status ==SYN_SEND)
 	{
@@ -1228,7 +1272,7 @@ void process(char *packet)
 						logInfo(LOG_INFO,"dup syn,ses over,time diff:%d",diff);
 					}else
 					{
-						logInfo(LOG_WARN,"duplicate syn,time diff:%d",diff);
+						logInfo(LOG_NOTICE,"duplicate syn,time diff:%d",diff);
 						outputPacketForDebug(LOG_NOTICE,CLIENT_FLAG,ip_header,
 								tcp_header);
 						return;
