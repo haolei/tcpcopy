@@ -1,7 +1,6 @@
 #ifndef  _TCP_REDIRECT_SESSION_H_INC
 #define  _TCP_REDIRECT_SESSION_H_INC
 
-
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 #include <sys/time.h>
@@ -20,7 +19,7 @@ extern virtual_ip_addr local_ips;
 extern uint16_t local_port;
 extern uint32_t remote_ip;
 extern uint16_t remote_port;
-extern int output_level;
+extern int global_out_level;
 
 #pragma pack(push,1)
 struct etharp_frame { 
@@ -49,7 +48,7 @@ typedef std::list<unsigned char *>::iterator dataIterator;
 #define UNKNOWN_FLAG 3
 #define SERVER_BACKEND_FLAG 4
 #define SELF_FLAG 5
-#define RESPONSE_MTU 1500
+#define DEFAULT_RESPONSE_MTU 1500
 #define RESERVE_CLIENT_FLAG 6
 
 #define FAKE_SYN_BUF_SIZE 52
@@ -66,6 +65,7 @@ struct session_st
 	uint16_t client_ip_id;
 
 	bool    reset_flag;
+	bool    over_flag;
 	bool 	isWaitBakendClosed;
 	bool 	isClientClosed;
 	bool 	isWaitResponse;
@@ -94,9 +94,15 @@ struct session_st
 	dataContainer handshakePackets;
 	size_t requestProcessed;
 	size_t responseReceived;
+	size_t reqContentPackets;
+	size_t baseReqContentPackets;
+	size_t respContentPackets;
 	time_t lastUpdateTime;
 	time_t lastResponseDispTime;
 	time_t createTime;
+	time_t lastRecvRespContentTime;
+
+	int logLevel;
 
 	int generateRandomNumber(int min,int max,unsigned int* seed)                                                                        
 	{
@@ -141,6 +147,7 @@ struct session_st
 
 	void initSessionForKeepalive()
 	{
+		logLevel=global_out_level;
 		fake_ip_addr=0;
 		isFakedSendingFinToBackend=false;
 		isTestConnClosed=false;
@@ -149,6 +156,7 @@ struct session_st
 		isStatClosed=false;
 		virtual_status = SYN_SEND;
 		reset_flag = false;
+		over_flag = false;
 		isWaitPreviousPacket=false;
 		isWaitBakendClosed=false;
 		isClientClosed=false;
@@ -169,9 +177,13 @@ struct session_st
 		lastSeqFromResponse=0;
 		requestProcessed=0;
 		responseReceived=0;
+		reqContentPackets=0;
+		baseReqContentPackets=0;
+		respContentPackets=0;
 		lastUpdateTime=time(0);
 		lastResponseDispTime=lastUpdateTime;
-		createTime=time(0);
+		createTime=lastUpdateTime;
+		lastRecvRespContentTime=lastUpdateTime;
 
 		for(dataIterator iter=unsend.begin();iter!=unsend.end();)
 		{
@@ -210,6 +222,8 @@ struct session_st
 		}
 		handshakePackets.clear();
 	}
+	void outputPacket(int level,int flag,struct iphdr *ip_header,
+			struct tcphdr *tcp_header);
 	int sendReservedLostPackets();
 	int sendReservedPackets();
 	bool checkPacketLost(struct iphdr *ip_header,
@@ -239,6 +253,10 @@ struct session_st
 			return true;
 		}
 		if(reset_flag)
+		{
+			return true;
+		}
+		if(over_flag)
 		{
 			return true;
 		}
