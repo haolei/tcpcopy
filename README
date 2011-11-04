@@ -4,26 +4,26 @@ Name:
 
 
 Description:
-    It can help you find bugs in your online project without actually being online.
-    And it can alo be used to test the stress that a system could endure.
+    It can help you find bugs in your online project without actually being online. 
+    And it can also be used to test the stress that a system could endure.
 
-    For example, if your system already has "memcached" subsystem and you want to
-    use "membase" to replace it, tcpcopy can assist you to test "membase". While your
-    old memcached system is still running online, tcpcopy could copy the flow of packets
-    from memcached to membase. From the point view of membase, the flow is accessing
-    membase(just like membase online), and it will not affect memcached at all except
+    For example, if your system already has "memcached" subsystem and you want to 
+    use "membase" to replace it, tcpcopy can assist you to test "membase". While your 
+    old memcached system is still running online, tcpcopy could copy the flow of packets 
+    from memcached to membase. From the point view of membase, the flow is accessing 
+    membase(just like membase online), and it will not affect memcached at all except 
     network bandwidth and a little cpu load.
 
 
 Functionalities:
     1) Distributed Stress Test
-        You can use online data to test the stress that your target machine can endure. It is better
+        You can use online data to test the stress that your target machine can endure. It is better 
         than apache ab tool and you can find bugs that only occur during high-stress situations.
     2) Hot Backup
         It is very suitable for backup tasks if connections are short-lived and the request loss rate
         is very low(1/100000).
     3) Normal Online Test
-        You can find whether the new system is stable and find bugs that only occur in actual
+        You can find whether the new system is stable and find bugs that only occur in actual 
         online environments.
     4) Comparison Test
         For example, you can use tcpcopy to compare the performances of apache and nginx.
@@ -49,14 +49,14 @@ How to use tcpcopy?
       the target machine(root privilege):
           modprobe ip_queue (if not running)
           iptables -I OUTPUT -p tcp --sport port -j QUEUE (if not set)
-          ./interception
+          ./interception 
       online machine(root privilege):
-          ./tcpcopy local_ip1[:local_ip2:...] local_port remote_ip remote_port
+          ./tcpcopy local_ip1[:local_ip2:...] local_port  remote_ip  remote_port 
  
 
 An example:
-    Suppose 13 and 14 are online machines, 148 is a target machine which is similar to
-    the online machines, and 12321 is used both as local port and remote port. We
+    Suppose 13 and 14 are online machines, 148 is a target machine which is similar to 
+    the online machines, and 12321 is used both as local port and remote port. We 
     use tcpcopy to test if 148 can endure two times of current online stress.
     
     Using tcpcopy to perform the above test task.
@@ -81,18 +81,18 @@ An example:
            20184 root 15 0 5624 4232 292 S 17.0 0.2 0:52.82 interception
 
     Access log analysis:
-        13 online machine: grep 'Tue 11:08' access_0913_11.log |wc -l :89316, 1489 reqs/sec
-        14 online machine: grep 'Tue 11:08' access_0913_11.log |wc -l :89309, 1488 reqs/sec
-        148 test machine: grep 'Tue 11:08' access_0913_11.log |wc -l :178175, 2969 reqs/sec
+        13 online machine: grep 'Tue 11:08' access_0913_11.log |wc -l :89316,  1489 reqs/sec
+        14 online machine: grep 'Tue 11:08' access_0913_11.log |wc -l :89309,  1488 reqs/sec
+        148 test  machine: grep 'Tue 11:08' access_0913_11.log |wc -l :178175, 2969 reqs/sec
         request loss rate:
            (89316+89309-178175)/(89316+89309)=0.25%
 
-    From the above, we can see that the target machine can endure two times of current
+    From the above, we can see that the target machine can endure two times of current 
     online stress.
     
     What about the cpu load ?
-    tcpcopy on online machine 13 occupies 12.3% of cpu load, tcpcopy on online 14
-    occupies 14% and interception on target machine 148 occupies 17%. We can see
+    tcpcopy on online machine 13 occupies 12.3% of cpu load, tcpcopy on online 14 
+    occupies 14% and interception on target machine 148 occupies 17%. We can see 
     that the cpu load is very low here, and so is the memory usage.
 
 
@@ -102,6 +102,6 @@ Attention:
     3) If you tcpcopy local request, please set lo MTU not more than 1500.
     4) Interception(tcpcopy server) is single threaded.
     5) tcpcopy needs root privilege.
-    6) long request(such as upload file) is not working well here(no retransmission when sending packets to the target test server)
-    7) long responses are not well supported now (to be fixed later)
-    8) Check error.log if you have trouble and email to me(163.beijing@gmail.com or wangbin579@gmail.com).
+    6) long request(such as uploading a large file) is not working well here(no retransmission when sending packets to the target test server)
+    7) Check error.log if you have trouble and email to me(163.beijing@gmail.com or wangbin579@gmail.com).
+
