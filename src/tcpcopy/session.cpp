@@ -33,6 +33,7 @@ static uint64_t totalReconnectForNoSyn=0;
 static uint64_t timeCount=0;
 static uint64_t totalResponses=0;
 static uint64_t totalRequests=0;
+static uint64_t totalConnections=0;
 static uint64_t totalNumOfNoRespSession=0;
 
 /**
@@ -416,6 +417,11 @@ int session_st::sendReservedPackets()
 			mayPause=true;
 			prevPacket=copy_ip_packet(ip_header);
 			prePackSize=packSize;
+		}else if(tcp_header->rst){
+			reset_flag=true;
+			isOmitTransfer=false;
+			logInfo(LOG_DEBUG,"send reset packet to backend");
+			needPause=true;
 		}else if(tcp_header->fin)
 		{
 			needPause=true;
@@ -442,10 +448,10 @@ int session_st::sendReservedPackets()
 
 		if(!isOmitTransfer)
 		{
+			count++;
 			send_ip_packet(fake_ip_addr,data,
 					virtual_next_sequence,&nextSeq);
 		}
-		count++;
 		free(data);
 		unsend.pop_front();
 		if(isOmitTransfer)
@@ -644,6 +650,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 
 	if( tcp_header->syn)
 	{
+		totalConnections++;
 		virtual_next_sequence = plus_1(tcp_header->seq);
 		virtual_status = SYN_CONFIRM;
 		if(isHalfWayIntercepted)
@@ -661,6 +668,9 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 		logInfo(LOG_INFO,"recv fin from backend");
 		isTestConnClosed=true;
 		isWaitBakendClosed=false;
+		isWaitResponse=false;
+		isTrueWaitResponse=false;
+		isResponseCompletely=true;
 		virtual_status  |= SERVER_FIN;
 		virtual_next_sequence = plus_1(tcp_header->seq);
 		int count=sendReservedPackets();
@@ -679,7 +689,10 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 	{
 		if(isWaitResponse)
 		{
-			totalRequests++;
+			if(!isTrueWaitResponse)
+			{
+				totalRequests++;
+			}
 			isTrueWaitResponse=true;
 		}
 		
@@ -865,9 +878,18 @@ void session_st::process_recv(struct iphdr *ip_header,
 	//processing the reset packet
 	if(tcp_header->rst)
 	{
-		send_ip_packet(fake_ip_addr,(unsigned char *) ip_header,
-				virtual_next_sequence,&nextSeq);
-		reset_flag = true;
+		isClientReset=true;
+		logInfo(LOG_INFO,"reset from client");
+		if(! unsend.empty())
+		{
+			logInfo(LOG_INFO,"push reset packet from client");
+			unsend.push_back(copy_ip_packet(ip_header));
+		}else
+		{
+			send_ip_packet(fake_ip_addr,(unsigned char *) ip_header,
+					virtual_next_sequence,&nextSeq);
+			reset_flag = true;
+		}
 		return;
 	}
 	//processing the syn packet
@@ -883,6 +905,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 	//processing the fin packet
 	if(tcp_header->fin)
 	{
+		logInfo(LOG_DEBUG,"recv fin packet from backend");
 		if(isFakedSendingFinToBackend)
 		{
 			return;
@@ -1211,14 +1234,14 @@ void process(char *packet)
 	bool reusePort=false;
 	timeCount++;
 
-	if(timeCount%1000000==0)
+	if(timeCount%100000==0)
 	{
 		//this is for checking memory leak
 		logInfo(LOG_NOTICE,
-				"activeCount:%llu,total reqs:%llu,rel reqs:%llu,obs del:%llu",
+				"activeCount:%llu,total syns:%llu,rel reqs:%llu,obs del:%llu",
 				activeCount,enterCount,leaveCount,deleteObsoCount);
-		logInfo(LOG_NOTICE,"total requests:%llu,total responses:%llu",totalRequests,
-				totalResponses);
+		logInfo(LOG_NOTICE,"total conns:%llu,total reqs:%llu,total resps:%llu",
+				totalConnections,totalRequests,totalResponses);
 		clearTimeoutTcpSessions();
 	}
 
