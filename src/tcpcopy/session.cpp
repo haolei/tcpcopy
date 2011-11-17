@@ -923,7 +923,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 		//client sends fin ,and the server acks it
 		if(virtual_ack == tcp_header->seq)
 		{
-			if(isWaitBakendClosed)
+			if(isWaitResponse||isWaitBakendClosed)
 			{
 				unsend.push_back(copy_ip_packet(ip_header));
 			}else
