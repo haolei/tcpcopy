@@ -925,6 +925,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 		{
 			if(isWaitResponse||isWaitBakendClosed)
 			{
+				logInfo(LOG_DEBUG,"push back packet");
 				unsend.push_back(copy_ip_packet(ip_header));
 			}else
 			{
@@ -1257,7 +1258,7 @@ void process(char *packet)
 	bool reusePort=false;
 	timeCount++;
 
-	if(timeCount%100000==0)
+	if(timeCount%10000==0)
 	{
 		//this is for checking memory leak
 		logInfo(LOG_NOTICE,
