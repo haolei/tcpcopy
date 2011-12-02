@@ -1574,7 +1574,8 @@ void session_st::process_recv(struct iphdr *ip_header,
 						//lost and retransmitted
 						send_ip_packet(fake_ip_addr,
 								(unsigned char *)ip_header,
-								virtual_next_sequence,&nextSeq,&sendConPackets);
+								virtual_next_sequence,
+								&nextSeq,&sendConPackets);
 						sendReservedLostPackets();
 						isWaitResponse=true;
 						isResponseCompletely=false;
