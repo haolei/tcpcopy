@@ -116,14 +116,15 @@ static int clearTimeoutTcpSessions()
 	 * so we adopt a naive method to distinguish between short-lived 
 	 * and long-lived sessions(one connection represents one session)
 	 */
-	time_t normalBase=time(0)-60;
-	time_t keepaliveBase=time(0)-1800;
+	time_t current=time(0);
+	time_t normalBase=current-60;
+	time_t keepaliveBase=current-1800;
 	time_t tmpBase=0;
 	double ratio=100.0*enterCount/(totalRequests+1);
 	size_t MAXPACKETS=5000;
 	if(isMySqlCopy)
 	{
-		MAXPACKETS=6000;
+		MAXPACKETS=10000;
 	}
 	if(ratio<10)
 	{
@@ -133,6 +134,13 @@ static int clearTimeoutTcpSessions()
 	logInfo(LOG_NOTICE,"session number when coming:%u",sessions.size());
 	for(SessIterator p=sessions.begin();p!=sessions.end();)
 	{
+		double diff=current-p->second.lastRecvRespContentTime;
+		if(diff<5)
+		{
+			p++;
+			continue;
+		}
+
 		if(p->second.isKeepalive)
 		{
 			tmpBase=keepaliveBase;
@@ -608,6 +616,7 @@ void session_st::sendFakedSynToBackend(struct iphdr* ip_header,
 	handshakePackets.push_back(data);
 	if(isMySqlCopy)
 	{
+		isPureRequestBegin=true;
 		if(fir_auth_user_pack)
 		{
 			isLoginCopyed=true;	
@@ -1387,11 +1396,18 @@ void session_st::process_recv(struct iphdr *ip_header,
 	uint32_t tmpLastAck=lastAck;
 	bool isNewRequest=false;
 	bool isNeedOmit=false;
-
+	if(isMySqlCopy)
+	{
+		if(!isGreeingReceived&&isHalfWayIntercepted)
+		{
+			unsend.push_back(copy_ip_packet(ip_header));
+			return;
+		}
+	}
 	if(contSize>0)
 	{
 		reqContentPackets++;
-		if(isMySqlCopy&&isSynIntercepted)
+		if(isMySqlCopy&&!isHalfWayIntercepted)
 		{
 			if(!isPureRequestBegin)
 			{
