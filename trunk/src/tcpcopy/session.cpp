@@ -150,7 +150,7 @@ static int clearTimeoutTcpSessions()
 			if(!p->second.candidateErased)
 			{
 				p->second.candidateErased=true;
-				logInfo(LOG_NOTICE,"set candidate erased");
+				logInfo(LOG_NOTICE,"unsend:set candidate erased");
 				p++;
 				continue;
 			}
@@ -170,7 +170,7 @@ static int clearTimeoutTcpSessions()
 		{
 			if(!p->second.candidateErased)
 			{
-				logInfo(LOG_NOTICE,"set candidate erased");
+				logInfo(LOG_NOTICE,"lostPackets:set candidate erased");
 				p->second.candidateErased=true;
 				p++;
 				continue;
@@ -191,7 +191,7 @@ static int clearTimeoutTcpSessions()
 		{
 			if(!p->second.candidateErased)
 			{
-				logInfo(LOG_NOTICE,"set candidate erased");
+				logInfo(LOG_NOTICE,"handshake:set candidate erased");
 				p->second.candidateErased=true;
 				p++;
 				continue;
@@ -214,7 +214,7 @@ static int clearTimeoutTcpSessions()
 			{
 				if(!p->second.candidateErased)
 				{
-					logInfo(LOG_NOTICE,"set candidate erased");
+					logInfo(LOG_NOTICE,"mysql:set candidate erased");
 					p->second.candidateErased=true;
 					p++;
 					continue;
@@ -882,7 +882,7 @@ void session_st::establishConnectionForClosedConn()
 			client_ip_addr=ip_header->saddr;
 		}else
 		{
-			logInfo(LOG_DEBUG,"erase fake_ip_addr\n");
+			logInfo(LOG_DEBUG,"erase fake_ip_addr");
 			trueIPContainer.erase(get_ip_port_value(fake_ip_addr,
 						tcp_header->source));
 		}
@@ -1076,6 +1076,11 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 	{
 		logInfo(LOG_NOTICE,"ack from back is less than nextSeq:%u,%u,port=%u",
 				ack,nextSeq,client_port);
+		if(isClientClosed&&!tcp_header->fin)
+		{
+			sendFakedFinToBackend(ip_header,tcp_header);
+			return;
+		}
 		if(tot_len>0)
 		{
 			needContinueProcessingForBakAck=true;
@@ -1252,6 +1257,9 @@ void session_st::process_recv(struct iphdr *ip_header,
 			sendFakedFinToBackByCliePack(ip_header,tcp_header);
 			isClientClosed=true;
 			logInfo(LOG_NOTICE,"set client closed flag:%u",client_port);
+		}else
+		{
+			sendFakedFinToBackByCliePack(ip_header,tcp_header);
 		}
 		return;
 	}
@@ -1393,6 +1401,14 @@ void session_st::process_recv(struct iphdr *ip_header,
 					isNeedOmit=true;
 					isPureRequestBegin=true;
 					logInfo(LOG_INFO,"this is the sec auth packet");
+				}
+				if(0==packetNumber)
+				{
+					if(isLoginSuccessful)
+					{
+						isPureRequestBegin=true;
+						logInfo(LOG_INFO,"it has no sec auth packet");
+					}
 				}
 			}
 			if(isNeedOmit)
