@@ -123,7 +123,7 @@ static int clearTimeoutTcpSessions()
 	size_t MAXPACKETS=5000;
 	if(isMySqlCopy)
 	{
-		MAXPACKETS=1000;
+		MAXPACKETS=6000;
 	}
 	if(ratio<10)
 	{
@@ -814,7 +814,13 @@ void session_st::sendFakedFinToBackByCliePack(struct iphdr* ip_header,
 	tcp_header2->ack=1;
 	
 	tcp_header2->ack_seq = virtual_next_sequence;
-	tcp_header2->seq =htonl(nextSeq); 
+	if(isClientClosed)
+	{
+		tcp_header2->seq =htonl(nextSeq-1); 
+	}else
+	{
+		tcp_header2->seq =htonl(nextSeq); 
+	}
 	tcp_header2->window= 65535;
 	send_ip_packet(fake_ip_addr,fake_fin_buf,
 			virtual_next_sequence,&nextSeq,&sendConPackets);
