@@ -48,7 +48,7 @@ static int raw_sock;
 static uint64_t packetsPutNum=0;
 
 /*if true,then tcpcopy mysql request replication*/
-bool isMySqlCopy=false;
+bool isMySqlCopy=true;
 
 /**
  * put one packet to buffered pool
