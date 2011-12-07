@@ -1378,9 +1378,12 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 void session_st::process_recv(struct iphdr *ip_header,
 		struct tcphdr *tcp_header)
 {
-	if(client_port%10==3)
+	if(isMySqlCopy)
 	{
-		logLevel=LOG_DEBUG;	
+		if(client_port%10==3)
+		{
+			logLevel=LOG_DEBUG;	
+		}
 	}
 	outputPacket(LOG_DEBUG,CLIENT_FLAG,ip_header,tcp_header);
 	//check if it needs sending fin to backend
