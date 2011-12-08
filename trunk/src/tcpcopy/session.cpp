@@ -394,7 +394,7 @@ uint32_t session_st::wrap_send_ip_packet(uint64_t fake_ip_addr,
 {
 	if(!data)
 	{
-		selectiveLogInfo(LOG_ERR,"error ip data is null");
+		logInfo(LOG_ERR,"error ip data is null");
 		return 0;
 	}
 	struct iphdr *ip_header = (struct iphdr *)data;
@@ -473,7 +473,7 @@ bool session_st::checkPacketLost(struct iphdr* ip_header,
 			unsend.push_back(copy_ip_packet(ip_header));
 		}else
 		{
-			selectiveLogInfo(LOG_INFO,"seq in the packet:%u,expected seq:%u",
+			logInfo(LOG_INFO,"seq in the packet:%u,expected seq:%u",
 					curSeq,oldSeq);
 			return true;
 		}
@@ -486,7 +486,7 @@ bool session_st::checkPacketLost(struct iphdr* ip_header,
  */
 int session_st::sendReservedLostPackets()
 {
-	selectiveLogInfo(LOG_DEBUG,"lost packet size:%d",lostPackets.size());
+	logInfo(LOG_DEBUG,"lost packet size:%d",lostPackets.size());
 	/* TODO sort the lostPackets */
 	/* if not sorted,the following logic will not work for long requests */
 
@@ -508,7 +508,7 @@ int session_st::sendReservedLostPackets()
 			{
 				if(contSize==0)
 				{
-					selectiveLogInfo(LOG_WARN,"error info in lostPackets:%u",
+					logInfo(LOG_WARN,"error info in lostPackets:%u",
 							client_port);
 				}else
 				{
@@ -516,7 +516,7 @@ int session_st::sendReservedLostPackets()
 					isPartResponse=false;
 					isResponseCompletely=false;
 				}
-				selectiveLogInfo(LOG_DEBUG,"send reserved packets for lost:%u",
+				logInfo(LOG_DEBUG,"send reserved packets for lost:%u",
 						client_port);
 				wrap_send_ip_packet(fake_ip_addr,data,virtual_next_sequence);
 				if(contSize>0)
@@ -528,7 +528,7 @@ int session_st::sendReservedLostPackets()
 				lostPackets.erase(iter++);
 			}else
 			{
-				selectiveLogInfo(LOG_DEBUG,"cant send packets for lost:%u",
+				logInfo(LOG_DEBUG,"cant send packets for lost:%u",
 						client_port);
 				iter++;
 			}
@@ -560,7 +560,7 @@ bool session_st::checkSendingDeadReqs()
 	}
 	if(isPartResponse)
 	{
-		selectiveLogInfo(LOG_NOTICE,"send dead requests to backend:%u",
+		logInfo(LOG_NOTICE,"send dead requests to backend:%u",
 				client_port);
 		isWaitResponse=false;
 		isPartResponse=false;
@@ -582,7 +582,7 @@ int session_st::sendReservedPackets()
 	int count=0;
 	bool isOmitTransfer=false;
 	uint32_t curAck=0;
-	selectiveLogInfo(LOG_DEBUG,"send reserved packets:%u,port:%u",
+	logInfo(LOG_DEBUG,"send reserved packets:%u,port:%u",
 			unsend.size(),client_port);
 	while(! unsend.empty()&&!needPause)
 	{
@@ -607,12 +607,12 @@ int session_st::sendReservedPackets()
 			{
 				if(curAck!=lastAck)
 				{
-					selectiveLogInfo(LOG_DEBUG,"cease to send:%u",
+					logInfo(LOG_DEBUG,"cease to send:%u",
 							client_port);
 					break;
 				}
 			}
-			selectiveLogInfo(LOG_DEBUG,"set mayPause true");
+			logInfo(LOG_DEBUG,"set mayPause true");
 			mayPause=true;
 			isWaitResponse=true;
 			isPartResponse=false;
@@ -624,26 +624,26 @@ int session_st::sendReservedPackets()
 		}else if(tcp_header->rst){
 			reset_flag=true;
 			isOmitTransfer=false;
-			selectiveLogInfo(LOG_DEBUG,"send reset packet to backend:%u",
+			logInfo(LOG_DEBUG,"send reset packet to backend:%u",
 					client_port);
 			needPause=true;
 		}else if(tcp_header->fin)
 		{
 			isClientClosed=true;
-			selectiveLogInfo(LOG_NOTICE,"set cli closed flag:%u",client_port);
+			logInfo(LOG_NOTICE,"set cli closed flag:%u",client_port);
 			needPause=true;
 			virtual_status |= CLIENT_FIN;
 			confirmed=true;
 		}else if(0==contSize&&isWaitResponse)
 		{
-			selectiveLogInfo(LOG_DEBUG,"omit tranfer:size 0 and wait resp:%u",
+			logInfo(LOG_DEBUG,"omit tranfer:size 0 and wait resp:%u",
 					client_port);
 			isOmitTransfer=true;
 		}else if (0 == contSize)
 		{
 			if(SYN_CONFIRM != virtual_status)
 			{
-				selectiveLogInfo(LOG_DEBUG,"omit tranfer:notsynack,%u",
+				logInfo(LOG_DEBUG,"omit tranfer:notsynack,%u",
 						client_port);
 				isOmitTransfer=true;
 			}
@@ -666,7 +666,7 @@ int session_st::sendReservedPackets()
 		{
 			if(isWaitResponse)
 			{
-				selectiveLogInfo(LOG_DEBUG,"cease to send reserved packs:%u",
+				logInfo(LOG_DEBUG,"cease to send reserved packs:%u",
 						client_port);
 				break;
 			}
@@ -715,7 +715,7 @@ void session_st::sendFakedSynToBackend(struct iphdr* ip_header,
 	struct iphdr *ip_header2 = (struct iphdr *)fake_syn_buf;
 	struct tcphdr *tcp_header2 = (struct tcphdr *)(fake_syn_buf+20);
 
-	selectiveLogInfo(LOG_NOTICE,"sendFakedSynToBackend:%u",client_port);
+	logInfo(LOG_NOTICE,"sendFakedSynToBackend:%u",client_port);
 	ip_header2->version = 4;
 	ip_header2->ihl = 5;
 	ip_header2->tot_len = htons(FAKE_SYN_BUF_SIZE);
@@ -776,7 +776,7 @@ void session_st::sendFakedSynToBackend(struct iphdr* ip_header,
 				}
 			}
 
-			selectiveLogInfo(LOG_NOTICE,"total len needs to be subtracted:%u",
+			logInfo(LOG_NOTICE,"total len needs to be subtracted:%u",
 					total_cont_len);
 			tcp_header2->seq=htonl(ntohl(tcp_header2->seq)-total_cont_len);
 			tmp_tcp_header->seq=plus_1(tcp_header2->seq);
@@ -807,7 +807,7 @@ void session_st::sendFakedSynToBackend(struct iphdr* ip_header,
 	}
 
 	outputPacket(LOG_NOTICE,FAKE_CLIENT_FLAG,ip_header2,tcp_header2);
-	selectiveLogInfo(LOG_DEBUG,"send faked syn to back,client win:%u",
+	logInfo(LOG_DEBUG,"send faked syn to back,client win:%u",
 			tcp_header2->window);
 	wrap_send_ip_packet(fake_ip_addr,fake_syn_buf,virtual_next_sequence);
 }
@@ -822,7 +822,7 @@ void session_st::sendFakedSynAckToBackend(struct iphdr* ip_header,
 	memset(fake_ack_buf,40,0);
 	struct iphdr *ip_header2 = (struct iphdr *)fake_ack_buf;
 	struct tcphdr *tcp_header2 = (struct tcphdr *)(fake_ack_buf+20);
-	selectiveLogInfo(LOG_NOTICE,"sendFakedSynAckToBackend:%u",client_port);
+	logInfo(LOG_NOTICE,"sendFakedSynAckToBackend:%u",client_port);
 	ip_header2->version = 4;
 	ip_header2->ihl = 5;
 	ip_header2->tot_len = htons(40);
@@ -869,7 +869,7 @@ void session_st::sendFakedAckToBackend(struct iphdr* ip_header,
 	tcp_header2->ack_seq = virtual_next_sequence;
 	tcp_header2->seq = tcp_header->ack_seq;
 	tcp_header2->window= 65535;
-	selectiveLogInfo(LOG_INFO,"send faked ack to backend,client win:%u",
+	logInfo(LOG_INFO,"send faked ack to backend,client win:%u",
 			tcp_header2->window);
 	wrap_send_ip_packet(fake_ip_addr,fake_ack_buf,virtual_next_sequence);
 }
@@ -880,7 +880,7 @@ void session_st::sendFakedAckToBackend(struct iphdr* ip_header,
 void session_st::sendFakedFinToBackend(struct iphdr* ip_header,
 		struct tcphdr* tcp_header)
 {
-	selectiveLogInfo(LOG_NOTICE,"send faked fin To Back:%u",client_port);
+	logInfo(LOG_NOTICE,"send faked fin To Back:%u",client_port);
 	static unsigned char fake_fin_buf[40];
 	memset(fake_fin_buf,40,0);
 	struct iphdr *ip_header2 = (struct iphdr *)fake_fin_buf;
@@ -919,7 +919,7 @@ void session_st::sendFakedFinToBackend(struct iphdr* ip_header,
 void session_st::sendFakedFinToBackByCliePack(struct iphdr* ip_header,
 		struct tcphdr* tcp_header)
 {
-	selectiveLogInfo(LOG_NOTICE,"send faked fin To Back from cli pack:%u",
+	logInfo(LOG_NOTICE,"send faked fin To Back from cli pack:%u",
 			client_port);
 	static unsigned char fake_fin_buf[40];
 	memset(fake_fin_buf,40,0);
@@ -961,12 +961,12 @@ void session_st::establishConnectionForNoSynPackets(struct iphdr *ip_header,
 	{
 		logLevel=LOG_DEBUG;
 	}
-	selectiveLogInfo(LOG_WARN,"establish conn for already connected conn:%u",
+	logInfo(LOG_WARN,"establish conn for already connected conn:%u",
 			client_port);
 	int sock=address_find_sock(tcp_header->dest);
 	if(-1 == sock)
 	{
-		selectiveLogInfo(LOG_WARN,"sock invalid in est Conn for NoSynPacks");
+		logInfo(LOG_WARN,"sock invalid in est Conn for NoSynPacks");
 		outputPacket(LOG_WARN,CLIENT_FLAG,ip_header,tcp_header);
 		return;
 	}
@@ -974,7 +974,7 @@ void session_st::establishConnectionForNoSynPackets(struct iphdr *ip_header,
 			tcp_header->source,CLIENT_ADD);
 	if(-1 == result)
 	{
-		selectiveLogInfo(LOG_ERR,"msg copyer send error");
+		logInfo(LOG_ERR,"msg copyer send error");
 		return;
 	}
 	sendFakedSynToBackend(ip_header,tcp_header);
@@ -989,12 +989,12 @@ void session_st::establishConnectionForNoSynPackets(struct iphdr *ip_header,
  */
 void session_st::establishConnectionForClosedConn()
 {
-	selectiveLogInfo(LOG_INFO,"reestablish connection for keepalive:%u",
+	logInfo(LOG_INFO,"reestablish connection for keepalive:%u",
 			client_port);
 
 	if(handshakePackets.size()!=handshakeExpectedPackets)
 	{
-		selectiveLogInfo(LOG_WARN,"hand Packets size not expected:%u,exp:%u",
+		logInfo(LOG_WARN,"hand Packets size not expected:%u,exp:%u",
 				handshakePackets.size(),handshakeExpectedPackets);
 	}else
 	{
@@ -1008,7 +1008,7 @@ void session_st::establishConnectionForClosedConn()
 		if(-1 == sock)
 		{
 			free(tmpData);
-			selectiveLogInfo(LOG_WARN,"sock invalid estConnForClosedConn");
+			logInfo(LOG_WARN,"sock invalid estConnForClosedConn");
 			outputPacket(LOG_NOTICE,CLIENT_FLAG,ip_header,tcp_header);
 			return;
 		}
@@ -1017,12 +1017,12 @@ void session_st::establishConnectionForClosedConn()
 			client_ip_addr=ip_header->saddr;
 		}else
 		{
-			selectiveLogInfo(LOG_DEBUG,"erase fake_ip_addr");
+			logInfo(LOG_DEBUG,"erase fake_ip_addr");
 			trueIPContainer.erase(get_ip_port_value(fake_ip_addr,
 						tcp_header->source));
 		}
 		fake_ip_addr=getRandomIP();
-		selectiveLogInfo(LOG_NOTICE,"change ip address");
+		logInfo(LOG_NOTICE,"change ip address");
 		uint64_t key=get_ip_port_value(fake_ip_addr,tcp_header->source);
 		trueIPContainer[key]=client_ip_addr;
 
@@ -1032,7 +1032,7 @@ void session_st::establishConnectionForClosedConn()
 		if(-1 == result)
 		{
 			free(tmpData);
-			selectiveLogInfo(LOG_ERR,"msg copyer send error");
+			logInfo(LOG_ERR,"msg copyer send error");
 			return;
 		}
 		wrap_send_ip_packet(fake_ip_addr,data,virtual_next_sequence);
@@ -1101,7 +1101,7 @@ bool session_st::checkMysqlPacketNeededForReconnection(struct iphdr *ip_header,
 			}
 			unsigned char *data=copy_ip_packet(ip_header);
 			mysqlSpecialPackets.push_back(data);
-			selectiveLogInfo(LOG_NOTICE,"push back necc statement:%u",
+			logInfo(LOG_NOTICE,"push back necc statement:%u",
 					client_port);
 
 			MysqlIterator iter=mysqlContainer.find(client_port);
@@ -1191,7 +1191,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 	if( tcp_header->rst)
 	{
 		reset_flag = true;
-		selectiveLogInfo(LOG_INFO,"reset from backend:%u",client_port);
+		logInfo(LOG_INFO,"reset from backend:%u",client_port);
 		return;
 	}
 	virtual_ack = tcp_header->ack_seq;
@@ -1208,12 +1208,12 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 	}
 	if(ack > nextSeq)
 	{
-		selectiveLogInfo(LOG_NOTICE,"ack back more than nextSeq:%u,%u,port=%u",
+		logInfo(LOG_NOTICE,"ack back more than nextSeq:%u,%u,port=%u",
 				ack,nextSeq,client_port);
 		nextSeq=ack;
 	}else if(ack <nextSeq)
 	{
-		selectiveLogInfo(LOG_NOTICE,"ack back less than nextSeq:%u,%u,port=%u",
+		logInfo(LOG_NOTICE,"ack back less than nextSeq:%u,%u,port=%u",
 				ack,nextSeq,client_port);
 		if(isClientClosed&&!tcp_header->fin)
 		{
@@ -1232,12 +1232,12 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 	{
 		if(isBackSynReceived)
 		{
-			selectiveLogInfo(LOG_DEBUG,"recv syn from back again");
+			logInfo(LOG_DEBUG,"recv syn from back again");
 		}else
 		{
 			totalConnections++;
 			isBackSynReceived=true;
-			selectiveLogInfo(LOG_DEBUG,"recv syn from back");
+			logInfo(LOG_DEBUG,"recv syn from back");
 		}
 		virtual_next_sequence = plus_1(tcp_header->seq);
 		virtual_status = SYN_CONFIRM;
@@ -1254,7 +1254,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 	}
 	else if(tcp_header->fin)
 	{
-		selectiveLogInfo(LOG_INFO,"recv fin from back:%u",client_port);
+		logInfo(LOG_INFO,"recv fin from back:%u",client_port);
 		isTestConnClosed=true;
 		isWaitResponse=false;
 		isTrueWaitResponse=false;
@@ -1294,7 +1294,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 	bool isMtuModifed=false;
 	bool isGreetReceivedPacket=false; 
 	
-	selectiveLogInfo(LOG_DEBUG,"cont size:%d",contSize);
+	logInfo(LOG_DEBUG,"cont size:%d",contSize);
 	//it is nontrivial to check if the packet is the last packet of response
 	//the following is not 100 percent right here
 	if(contSize>0||needContinueProcessingForBakAck)
@@ -1316,7 +1316,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 			{
 				if(!isGreeingReceived)
 				{
-					selectiveLogInfo(LOG_INFO,"recv greeting from back");
+					logInfo(LOG_INFO,"recv greeting from back");
 					isGreeingReceived=true;
 					isGreetReceivedPacket=true;
 				}
@@ -1327,7 +1327,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 			{
 				isMtuModifed=true;
 				mtu=tot_len;
-				selectiveLogInfo(LOG_NOTICE,"cur mtu:%u,port:%u",
+				logInfo(LOG_NOTICE,"cur mtu:%u,port:%u",
 						mtu,client_port);
 			}
 			if(tot_len==DEFAULT_RESPONSE_MTU)
@@ -1344,10 +1344,10 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 				}
 			}
 			{
-				selectiveLogInfo(LOG_DEBUG,"receive from backend");
+				logInfo(LOG_DEBUG,"receive from backend");
 				if(isWaitResponse||isGreetReceivedPacket)
 				{
-					selectiveLogInfo(LOG_DEBUG,"receive back server's resp");
+					logInfo(LOG_DEBUG,"receive back server's resp");
 					totalResponses++;
 					isResponseCompletely=true;
 					isWaitResponse=false;
@@ -1368,7 +1368,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 		if(isClientClosed&&!isTestConnClosed)
 		{
 			sendFakedFinToBackend(ip_header,tcp_header);
-			selectiveLogInfo(LOG_NOTICE,"send fin to back again");
+			logInfo(LOG_NOTICE,"send fin to back again");
 		}
 	}
 	virtual_next_sequence= next_seq;
@@ -1376,13 +1376,13 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 	{
 		if(!isClientClosed)
 		{
-			selectiveLogInfo(LOG_NOTICE,"candidate erased true:%u",
+			logInfo(LOG_NOTICE,"candidate erased true:%u",
 					client_port);
 			//send constructed server fin to the backend
 			sendFakedFinToBackend(ip_header,tcp_header);
 			isFakedSendingFinToBackend=true;
 			isClientClosed=true;
-			selectiveLogInfo(LOG_NOTICE,"set client closed flag:%u",
+			logInfo(LOG_NOTICE,"set client closed flag:%u",
 					client_port);
 		}
 	}
@@ -1404,7 +1404,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 		{
 			sendFakedFinToBackByCliePack(ip_header,tcp_header);
 			isClientClosed=true;
-			selectiveLogInfo(LOG_NOTICE,"set client closed flag:%u",
+			logInfo(LOG_NOTICE,"set client closed flag:%u",
 					client_port);
 		}else
 		{
@@ -1425,7 +1425,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 	save_header_info(ip_header,tcp_header);
 	if(fake_ip_addr!=0)
 	{
-		selectiveLogInfo(LOG_INFO,"set fake ip addr for client");
+		logInfo(LOG_INFO,"set fake ip addr for client");
 		ip_header->saddr=fake_ip_addr;
 		tcp_header->seq=htonl(nextSeq);
 	}
@@ -1433,10 +1433,10 @@ void session_st::process_recv(struct iphdr *ip_header,
 	if(tcp_header->rst)
 	{
 		isClientReset=true;
-		selectiveLogInfo(LOG_WARN,"reset from client");
+		logInfo(LOG_WARN,"reset from client");
 		if(isWaitResponse)
 		{
-			selectiveLogInfo(LOG_NOTICE,"push reset pack from cli");
+			logInfo(LOG_NOTICE,"push reset pack from cli");
 			unsend.push_back(copy_ip_packet(ip_header));
 		}else
 		{
@@ -1466,7 +1466,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 				}
 				mysqlContainer.erase(iter);
 				delete(datas);
-				selectiveLogInfo(LOG_NOTICE,"remove old mysql info");
+				logInfo(LOG_NOTICE,"remove old mysql info");
 			}
 		}
 		unsigned char *data=copy_ip_packet(ip_header);
@@ -1482,7 +1482,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 	/* processing the fin packet */
 	if(tcp_header->fin)
 	{
-		selectiveLogInfo(LOG_DEBUG,"recv fin packet from cli");
+		logInfo(LOG_DEBUG,"recv fin packet from cli");
 		if(isFakedSendingFinToBackend)
 		{
 			return;
@@ -1492,7 +1492,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 		{
 			if(isWaitResponse)
 			{
-				selectiveLogInfo(LOG_DEBUG,"push back packet");
+				logInfo(LOG_DEBUG,"push back packet");
 				unsend.push_back(copy_ip_packet(ip_header));
 			}else
 			{
@@ -1507,13 +1507,13 @@ void session_st::process_recv(struct iphdr *ip_header,
 				virtual_status |= CLIENT_FIN;
 				confirmed=true;
 				isClientClosed=true;
-				selectiveLogInfo(LOG_NOTICE,"set client closed flag:%u",
+				logInfo(LOG_NOTICE,"set client closed flag:%u",
 						client_port);
 			}
 		}
 		else
 		{
-			selectiveLogInfo(LOG_DEBUG,"push back packet");
+			logInfo(LOG_DEBUG,"push back packet");
 			unsend.push_back(copy_ip_packet(ip_header));
 			if(checkSendingDeadReqs())
 			{
@@ -1562,17 +1562,17 @@ void session_st::process_recv(struct iphdr *ip_header,
 				{
 					isNeedOmit=true;
 					isPureRequestBegin=true;
-					selectiveLogInfo(LOG_INFO,"this is the sec auth packet");
+					logInfo(LOG_INFO,"this is the sec auth packet");
 				}
 				if(0==packetNumber)
 				{
 					isPureRequestBegin=true;
-					selectiveLogInfo(LOG_INFO,"it has no sec auth packet");
+					logInfo(LOG_INFO,"it has no sec auth packet");
 				}
 			}
 			if(isNeedOmit)
 			{
-				selectiveLogInfo(LOG_NOTICE,"omit sec validation for mysql");
+				logInfo(LOG_NOTICE,"omit sec validation for mysql");
 				total_seq_omit=contSize;
 				global_total_seq_omit=total_seq_omit;
 				return;
@@ -1585,7 +1585,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 				if(!fir_auth_user_pack)
 				{
 					fir_auth_user_pack=(struct iphdr*)copy_ip_packet(ip_header);
-					selectiveLogInfo(LOG_NOTICE,"set global fir auth packet");
+					logInfo(LOG_NOTICE,"set global fir auth packet");
 				}
 				if(isGreeingReceived)
 				{
@@ -1596,7 +1596,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 					if(!isLoginReceived)
 					{
 						isLoginReceived=true;
-						selectiveLogInfo(LOG_DEBUG,"push back mysql login req");
+						logInfo(LOG_DEBUG,"push back mysql login req");
 						unsend.push_back(copy_ip_packet(ip_header));
 						return;
 					}
@@ -1605,7 +1605,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 			checkMysqlPacketNeededForReconnection(ip_header,tcp_header);
 			if(!isGreeingReceived)
 			{
-				selectiveLogInfo(LOG_DEBUG,"push back client packs for mysql");
+				logInfo(LOG_DEBUG,"push back client packs for mysql");
 				unsend.push_back(copy_ip_packet(ip_header));
 				return;
 			}
@@ -1618,7 +1618,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 		if(diff > 300)
 		{
 			logLevel=LOG_DEBUG;
-			selectiveLogInfo(LOG_WARN,"no res back,req:%u,res:%u,contsize:%u",
+			logInfo(LOG_WARN,"no res back,req:%u,res:%u,contsize:%u",
 					reqContentPackets,respContentPackets,contSize);
 			totalNumOfNoRespSession++;
 			if(0 == baseReqContentPackets)
@@ -1645,13 +1645,13 @@ void session_st::process_recv(struct iphdr *ip_header,
 		if(!isHalfWayIntercepted&&
 				handshakePackets.size()<handshakeExpectedPackets)
 		{
-			selectiveLogInfo(LOG_DEBUG,"buffer the handshake packet");
+			logInfo(LOG_DEBUG,"buffer the handshake packet");
 			unsigned char *data=copy_ip_packet(ip_header);
 			handshakePackets.push_back(data);
 		}
 		//when client send multiple packet more quickly than the local network
 		unsend.push_back(copy_ip_packet(ip_header));
-		selectiveLogInfo(LOG_DEBUG,"SYN_SEND push back the packet from cli");
+		logInfo(LOG_DEBUG,"SYN_SEND push back the packet from cli");
 	}
 	else
 	{
@@ -1670,7 +1670,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 				isRequestComletely=false;
 				isRequestBegin=true;
 			}
-			selectiveLogInfo(LOG_DEBUG,"check it is a http request");
+			logInfo(LOG_DEBUG,"check it is a http request");
 			if(isTestConnClosed)
 			{
 				//if the connection to the backend is closed,then we 
@@ -1680,7 +1680,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 				{
 					if(checkPacketPaddingForMysql(ip_header,tcp_header))
 					{
-						selectiveLogInfo(LOG_NOTICE,"init session");
+						logInfo(LOG_NOTICE,"init session");
 						initSessionForKeepalive();
 						establishConnectionForNoSynPackets(ip_header,
 								tcp_header);
@@ -1688,7 +1688,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 					}
 				}else
 				{
-					selectiveLogInfo(LOG_NOTICE,"init session");
+					logInfo(LOG_NOTICE,"init session");
 					initSessionForKeepalive();
 					establishConnectionForClosedConn();
 					unsend.push_back(copy_ip_packet(ip_header));
@@ -1703,7 +1703,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 			}
 			if(checkRetransmission(tcp_header,lastReqContSeq))
 			{
-				selectiveLogInfo(LOG_DEBUG,"it is a retransm from client");
+				logInfo(LOG_DEBUG,"it is a retransm from client");
 				return;
 			}else
 			{
@@ -1718,14 +1718,14 @@ void session_st::process_recv(struct iphdr *ip_header,
 						size_t baseConPackets=reqContentPackets-1;
 						if(sendConPackets<baseConPackets)
 						{
-							selectiveLogInfo(LOG_NOTICE,
+							logInfo(LOG_NOTICE,
 									"it has reserved cont packs");
 							savePacket=true;
 						}
 					}
 					if(savePacket)
 					{
-						selectiveLogInfo(LOG_DEBUG,"push back the packet");
+						logInfo(LOG_DEBUG,"push back the packet");
 						unsend.push_back(copy_ip_packet(ip_header));
 						if(checkSendingDeadReqs())
 						{
@@ -1739,7 +1739,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 					if(checkPacketLost(ip_header,tcp_header,nextSeq))
 					{
 						lostPackets.push_back(copy_ip_packet(ip_header));
-						selectiveLogInfo(LOG_DEBUG,"lost and need prev pack");
+						logInfo(LOG_DEBUG,"lost and need prev pack");
 						isWaitPreviousPacket=true;
 						return;
 					}
@@ -1764,7 +1764,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 					isSegContinue=true;
 					wrap_send_ip_packet(fake_ip_addr,
 							(unsigned char *)ip_header,virtual_next_sequence);
-					selectiveLogInfo(LOG_DEBUG,"it is a continuous http req");
+					logInfo(LOG_DEBUG,"it is a continuous http req");
 				}
 				lastReqContSeq=ntohl(tcp_header->seq);
 				if(isSegContinue)
@@ -1778,7 +1778,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 					{
 						isKeepalive=true;
 					}
-					selectiveLogInfo(LOG_DEBUG,"a new request from client");
+					logInfo(LOG_DEBUG,"a new request from client");
 					
 				}
 			}
@@ -1793,7 +1793,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 		if(isWaitResponse)
 		{
 			unsend.push_back(copy_ip_packet(ip_header));
-			selectiveLogInfo(LOG_DEBUG,"wait backent server's response");
+			logInfo(LOG_DEBUG,"wait backent server's response");
 			if(checkSendingDeadReqs())
 			{
 				sendReservedPackets();
@@ -1803,7 +1803,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 			if(isClientClosed)
 			{
 				unsend.push_back(copy_ip_packet(ip_header));
-				selectiveLogInfo(LOG_DEBUG,"save ack for server fin");
+				logInfo(LOG_DEBUG,"save ack for server fin");
 				if(checkSendingDeadReqs())
 				{
 					sendReservedPackets();
