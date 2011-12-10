@@ -1274,9 +1274,11 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 		virtual_status  |= SERVER_FIN;
 		if(contSize>0)
 		{
-			virtual_next_sequence=htonl(ntohl(tcp_header->seq)+contSize);
+			virtual_next_sequence=htonl(ntohl(tcp_header->seq)+contSize+1);
+		}else
+		{
+			virtual_next_sequence = plus_1(tcp_header->seq);
 		}
-		virtual_next_sequence = plus_1(tcp_header->seq);
 		sendFakedAckToBackend(ip_header,tcp_header);
 		if(!isClientClosed)
 		{
