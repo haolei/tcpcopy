@@ -622,6 +622,10 @@ int session_st::sendReservedPackets()
 			lastReqContSeq=ntohl(tcp_header->seq);
 			lastAck=ntohl(tcp_header->ack_seq);
 		}else if(tcp_header->rst){
+			if(isWaitResponse)
+			{
+				break;
+			}
 			reset_flag=true;
 			isOmitTransfer=false;
 			selectiveLogInfo(LOG_DEBUG,"send reset packet to backend:%u",
@@ -629,6 +633,10 @@ int session_st::sendReservedPackets()
 			needPause=true;
 		}else if(tcp_header->fin)
 		{
+			if(isWaitResponse)
+			{
+				break;
+			}
 			isClientClosed=true;
 			selectiveLogInfo(LOG_NOTICE,"set cli closed flag:%u",client_port);
 			needPause=true;
@@ -1224,7 +1232,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 			sendFakedFinToBackend(ip_header,tcp_header);
 			return;
 		}
-		if(tot_len>0)
+		if(contSize>0)
 		{
 			needContinueProcessingForBakAck=true;
 		}
@@ -1264,6 +1272,10 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 		isTrueWaitResponse=false;
 		isResponseCompletely=true;
 		virtual_status  |= SERVER_FIN;
+		if(contSize>0)
+		{
+			virtual_next_sequence=htonl(ntohl(tcp_header->seq)+contSize);
+		}
 		virtual_next_sequence = plus_1(tcp_header->seq);
 		sendFakedAckToBackend(ip_header,tcp_header);
 		if(!isClientClosed)
