@@ -1942,16 +1942,6 @@ bool isPacketNeeded(const char *packet)
 	struct iphdr *ip_header;
 	uint32_t size_ip;
 	uint32_t size_tcp;
-	time_t now=time(0);
-	double diff=now-lastCheckDeadSessionTime;
-	if(diff>3)
-	{
-		if(sessions.size()>0)
-		{
-			sendDeadTcpPacketsForSessions();
-			lastCheckDeadSessionTime=now;
-		}
-	}
 	ip_header = (struct iphdr*)packet;
 	//check if it is a tcp packet
 	if(ip_header->protocol != IPPROTO_TCP)
@@ -2017,7 +2007,18 @@ void process(char *packet)
 			logInfo(LOG_WARN,"many connections can't be established");
 		}
 	}
-	
+
+	time_t now=time(0);
+	double diff=now-lastCheckDeadSessionTime;
+	if(diff>3)
+	{
+		if(sessions.size()>0)
+		{
+			sendDeadTcpPacketsForSessions();
+			lastCheckDeadSessionTime=now;
+		}
+	}
+
 	ip_header = (struct iphdr*)packet;
 	size_ip = ip_header->ihl<<2;
 	tcp_header = (struct tcphdr*)((char *)ip_header+size_ip);
@@ -2040,7 +2041,7 @@ void process(char *packet)
 		if(iter != sessions.end())
 		{
 			iter->second.confirmed=false;
-			iter->second.lastUpdateTime=time(0);
+			iter->second.lastUpdateTime=now;
 			iter->second.update_virtual_status(ip_header,tcp_header);
 			if( iter->second.is_over())
 			{
@@ -2070,7 +2071,7 @@ void process(char *packet)
 			if(iter != sessions.end())
 			{
 				//check if it is a duplicate syn
-				time_t now=time(0);
+				time_t now=now;
 				int diff=now-iter->second.createTime;
 				//if less than 30 seconds,then we consider it is a dup syn 
 				if(diff < 30)
@@ -2125,7 +2126,7 @@ void process(char *packet)
 			{
 				iter->second.confirmed=false;
 				iter->second.process_recv(ip_header,tcp_header);
-				iter->second.lastUpdateTime=time(0);
+				iter->second.lastUpdateTime=now;
 				if( (iter->second.is_over()))
 				{
 					if(!iter->second.isStatClosed)
