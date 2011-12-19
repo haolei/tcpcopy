@@ -61,6 +61,7 @@ uint32_t send_ip_packet(struct iphdr* ip_header,uint16_t tot_len)
 			(struct sockaddr *)&toaddr,sizeof(toaddr));
 	if(send_len == -1)
 	{
+		logInfo(LOG_ERR,"sock is:%u",sock);
 		perror("send to");
 	}
 	return send_len;

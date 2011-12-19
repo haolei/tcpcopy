@@ -1816,7 +1816,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 							selectiveLogInfo(LOG_NOTICE,
 									"it has reserved cont packs:%u,%u",
 									sendConPackets,baseConPackets);
-							if(checkReservedContainerHasContent())
+							//if(checkReservedContainerHasContent())
 							{
 								selectiveLogInfo(LOG_NOTICE,"save pack");
 								savePacket=true;
@@ -1838,7 +1838,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 				{
 					if(checkPacketLost(ip_header,tcp_header,nextSeq))
 					{
-						if(checkReservedContainerHasContent())
+						//if(checkReservedContainerHasContent())
 						{
 							selectiveLogInfo(LOG_DEBUG,"push back the pack");
 							unsend.push_back(copy_ip_packet(ip_header));
