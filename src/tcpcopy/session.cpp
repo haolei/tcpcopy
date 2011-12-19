@@ -1007,7 +1007,6 @@ void session_st::establishConnectionForNoSynPackets(struct iphdr *ip_header,
 {
 	if(isMySqlCopy)
 	{
-		logLevel=LOG_DEBUG;
 		selectiveLogInfo(LOG_WARN,"establish conn for already connected:%u",
 				client_port);
 	}else
