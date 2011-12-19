@@ -2012,11 +2012,11 @@ void process(char *packet)
 	double diff=now-lastCheckDeadSessionTime;
 	if(diff>3)
 	{
-		if(sessions.size()>0)
+		/*if(sessions.size()>0)
 		{
 			sendDeadTcpPacketsForSessions();
 			lastCheckDeadSessionTime=now;
-		}
+		}*/
 	}
 
 	ip_header = (struct iphdr*)packet;
