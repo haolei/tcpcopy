@@ -1541,6 +1541,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 				for(dataIterator iter2=datas->begin();
 						iter2!=datas->end();)
 				{
+					selectiveLogInfo(LOG_NOTICE,"delete iter");
 					 free(*(iter2++));
 				}
 				mysqlContainer.erase(iter);
