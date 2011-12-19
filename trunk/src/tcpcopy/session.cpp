@@ -41,6 +41,7 @@ static uint64_t totalConnections=0;
 static uint64_t totalNumOfNoRespSession=0;
 static struct iphdr *fir_auth_user_pack=NULL;
 static uint32_t global_total_seq_omit=0;
+static time_t lastCheckDeadSessionTime=time(0);
 
 /**
  * output packet info for debug
@@ -273,6 +274,19 @@ static int clearTimeoutTcpSessions()
 	}
 	logInfo(LOG_NOTICE,"session number when leaving:%u",sessions.size());
 	return 0;
+}
+
+static int sendDeadTcpPacketsForSessions()
+{
+	logInfo(LOG_NOTICE,"sendDeadTcpPacketsForSessions");
+	for(SessIterator p=sessions.begin();p!=sessions.end();p++)
+	{
+		if(p->second.checkSendingDeadReqs())
+		{
+			logInfo(LOG_WARN,"send dead reqs from global");
+			p->second.sendReservedPackets();
+		}
+	}
 }
 
 static bool checkLocalIPValid(uint32_t ip)
@@ -546,6 +560,7 @@ int session_st::sendReservedLostPackets()
 
 	return 0;
 }
+
 
 /**
  * check if it needs sending dead requests
@@ -1337,6 +1352,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 	uint32_t next_seq = htonl(ntohl(tcp_header->seq)+contSize);
 	bool isMtuModifed=false;
 	bool isGreetReceivedPacket=false; 
+	bool isStopSendReservedPacks=false;
 	
 	selectiveLogInfo(LOG_DEBUG,"cont size:%d",contSize);
 	//it is nontrivial to check if the packet is the last packet of response
@@ -1378,31 +1394,32 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 			{
 				if(tot_len>=DEFAULT_RESPONSE_MTU)
 				{
-					lastRespPacketSize=tot_len;
-					return;
+					isStopSendReservedPacks=true;
 				}
-				if(MIN_RESPONSE_MTU==tot_len)
+				if(!isStopSendReservedPacks&&MIN_RESPONSE_MTU==tot_len)
 				{
-					lastRespPacketSize=tot_len;
-					return;
+					isStopSendReservedPacks=true;
 				}
 			}else
 			{	
 				if(tot_len==DEFAULT_RESPONSE_MTU)
 				{
-					lastRespPacketSize=tot_len;
-					return;
+					isStopSendReservedPacks=true;
 				}
 			}
-			if(!isMtuModifed&&tot_len==mtu)
+			if(!isStopSendReservedPacks&&!isMtuModifed&&tot_len==mtu)
 			{
 				if(lastRespPacketSize==tot_len)
+				{
+					isStopSendReservedPacks=true;
+				}
+			}
+			{
+				if(isStopSendReservedPacks)
 				{
 					lastRespPacketSize=tot_len;
 					return;
 				}
-			}
-			{
 				selectiveLogInfo(LOG_DEBUG,"receive from backend");
 				if(isWaitResponse||isGreetReceivedPacket)
 				{
@@ -1454,6 +1471,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 void session_st::process_recv(struct iphdr *ip_header,
 		struct tcphdr *tcp_header)
 {	
+	lastRecvClientContentTime=time(0);
 	outputPacket(LOG_DEBUG,CLIENT_FLAG,ip_header,tcp_header);
 	uint16_t tot_len = ntohs(ip_header->tot_len);
 	uint32_t size_ip = ip_header->ihl<<2;
@@ -1689,8 +1707,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 			}
 		}
 
-		time_t current=time(0);
-		double diff=current-lastRecvRespContentTime;
+		double diff=lastRecvClientContentTime-lastRecvRespContentTime;
 		//if the sesssion recv no response for more than 5 min
 		//then enter the suicide process
 		if(diff > 300)
@@ -1926,7 +1943,16 @@ bool isPacketNeeded(const char *packet)
 	struct iphdr *ip_header;
 	uint32_t size_ip;
 	uint32_t size_tcp;
-
+	time_t now=time(0);
+	double diff=now-lastCheckDeadSessionTime;
+	if(diff>3)
+	{
+		if(sessions.size()>0)
+		{
+			sendDeadTcpPacketsForSessions();
+			lastCheckDeadSessionTime=now;
+		}
+	}
 	ip_header = (struct iphdr*)packet;
 	//check if it is a tcp packet
 	if(ip_header->protocol != IPPROTO_TCP)
@@ -1992,7 +2018,7 @@ void process(char *packet)
 			logInfo(LOG_WARN,"many connections can't be established");
 		}
 	}
-
+	
 	ip_header = (struct iphdr*)packet;
 	size_ip = ip_header->ihl<<2;
 	tcp_header = (struct tcphdr*)((char *)ip_header+size_ip);

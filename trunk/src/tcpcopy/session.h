@@ -126,6 +126,7 @@ struct session_st
 	time_t lastUpdateTime;
 	time_t createTime;
 	time_t lastRecvRespContentTime;
+	time_t lastRecvClientContentTime;
 
 	int logLevel;
 
@@ -232,6 +233,7 @@ struct session_st
 		lastUpdateTime=time(0);
 		createTime=lastUpdateTime;
 		lastRecvRespContentTime=lastUpdateTime;
+		lastRecvClientContentTime=lastUpdateTime;
 
 		if(unsend.size()>5)
 		{
