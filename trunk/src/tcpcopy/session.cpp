@@ -1542,7 +1542,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 						iter2!=datas->end();)
 				{
 					selectiveLogInfo(LOG_NOTICE,"delete iter");
-					 free(*(iter2++));
+					free(*(iter2++));
 				}
 				mysqlContainer.erase(iter);
 				delete(datas);
