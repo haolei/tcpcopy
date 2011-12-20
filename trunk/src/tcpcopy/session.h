@@ -38,6 +38,7 @@ void outputPacketForDebug(int level,int flag,struct iphdr *ip_header,
 typedef std::list<unsigned char *> dataContainer;
 typedef std::list<unsigned char *>::iterator dataIterator;
 
+
 #define SYN_SEND     1
 #define SYN_CONFIRM  2
 #define SEND_REQUEST 4
