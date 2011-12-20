@@ -45,6 +45,7 @@ static uint64_t writeCounter=0;
 static int raw_sock;
 static uint64_t packetsPutNum=0;
 static bool isSingleTh=true;
+static bool isReadCompletely=true;
 
 /*if true,then tcpcopy mysql request replication*/
 bool isMySqlCopy=false;
@@ -97,8 +98,10 @@ static char* getPacketFromPool()
 {
 	recvFromPoolPackets++;
 	pthread_mutex_lock (&mutex);
+	isReadCompletely=false;
 	if(readCounter>=writeCounter)
 	{
+		isReadCompletely=true;
 		pthread_cond_wait(&full, &mutex);
 	}
 	int readPos=readCounter%RECV_POOL_SIZE;
@@ -267,6 +270,10 @@ static void exit_tcp_copy(){
 
 static void tcp_copy_over(const int sig){
 	printf("sig %d received\n",sig);
+	while(!isReadCompletely)
+	{
+		sleep(1);
+	}
 	close(raw_sock);
 	send_close();
 	endLogInfo();
