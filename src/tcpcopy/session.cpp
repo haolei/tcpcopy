@@ -81,9 +81,9 @@ void outputPacketForDebug(int level,int flag,struct iphdr *ip_header,
 				packSize,seq,ack_seq);
 	}else if(SERVER_BACKEND_FLAG==flag)
 	{
-		logInfo(level,"to backend: %s:%u-->%s:%u,len %u ,seq=%u,ack_seq=%u",
+		logInfo(level,"to bac: %s:%u-->%s:%u,len %u ,seq=%u,ackseq=%u,win:%u",
 				sbuf,ntohs(tcp_header->source),dbuf,ntohs(tcp_header->dest),
-				packSize,seq,ack_seq);
+				packSize,seq,ack_seq,window);
 	}else if(RESERVE_CLIENT_FLAG==flag)
 	{
 		logInfo(level,"send buf packet %s:%u-->%s:%u,len %u,seq=%u,ack_seq=%u",
@@ -730,7 +730,7 @@ int session_st::sendReservedPackets()
 void session_st::save_header_info(struct iphdr *ip_header,
 		struct tcphdr *tcp_header){                                      
 	client_ip_id = ip_header->id;
-	tcp_header->window=65535;
+	tcp_header->window=htons(32000);
 }
 
 /**
@@ -778,7 +778,7 @@ void session_st::sendFakedSynToBackend(struct iphdr* ip_header,
 	tcp_header2->dest= tcp_header->dest;
 	tcp_header2->syn=1;
 	tcp_header2->seq = minus_1(tcp_header->seq);
-	tcp_header2->window= 65535;
+	tcp_header2->window=htons(32000) ;
 	virtual_next_sequence=tcp_header->seq;
 	unsigned char *data=copy_ip_packet(ip_header2);
 	handshakePackets.push_back(data);
@@ -886,7 +886,7 @@ void session_st::sendFakedSynAckToBackend(struct iphdr* ip_header,
 	tcp_header2->ack=1;
 	tcp_header2->ack_seq = virtual_next_sequence;
 	tcp_header2->seq = tcp_header->ack_seq;
-	tcp_header2->window= 65535;
+	tcp_header2->window= htons(32000);
 	unsigned char *data=copy_ip_packet(ip_header2);
 	handshakePackets.push_back(data);
 	outputPacket(LOG_NOTICE,FAKE_CLIENT_FLAG,ip_header2,tcp_header2);
@@ -916,7 +916,7 @@ void session_st::sendFakedAckToBackend(struct iphdr* ip_header,
 	tcp_header2->ack=1;
 	tcp_header2->ack_seq = virtual_next_sequence;
 	tcp_header2->seq = tcp_header->ack_seq;
-	tcp_header2->window= 65535;
+	tcp_header2->window= htons(32000);
 	selectiveLogInfo(LOG_INFO,"send faked ack to backend,client win:%u",
 			tcp_header2->window);
 	wrap_send_ip_packet(fake_ip_addr,fake_ack_buf,virtual_next_sequence);
@@ -957,7 +957,7 @@ void session_st::sendFakedFinToBackend(struct iphdr* ip_header,
 		tcp_header2->ack_seq = virtual_next_sequence;
 	}
 	tcp_header2->seq = tcp_header->ack_seq;
-	tcp_header2->window= 65535;
+	tcp_header2->window= htons(32000);
 	wrap_send_ip_packet(fake_ip_addr,fake_fin_buf,virtual_next_sequence);
 }
 
@@ -995,7 +995,7 @@ void session_st::sendFakedFinToBackByCliePack(struct iphdr* ip_header,
 	{
 		tcp_header2->seq =htonl(nextSeq); 
 	}
-	tcp_header2->window= 65535;
+	tcp_header2->window= htons(32000);
 	wrap_send_ip_packet(fake_ip_addr,fake_fin_buf,virtual_next_sequence);
 }
 
