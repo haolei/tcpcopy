@@ -1360,10 +1360,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 	{
 		respContentPackets++;
 		virtual_next_sequence =next_seq;
-		if(!isClientClosed)
-		{
-			sendFakedAckToBackend(ip_header,tcp_header);
-		}else
+		if(isClientClosed)
 		{
 			sendFakedFinToBackend(ip_header,tcp_header);
 			return;
@@ -1416,6 +1413,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 			{
 				if(isStopSendReservedPacks)
 				{
+					sendFakedAckToBackend(ip_header,tcp_header);
 					lastRespPacketSize=tot_len;
 					return;
 				}
