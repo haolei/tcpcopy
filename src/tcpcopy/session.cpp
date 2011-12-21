@@ -574,7 +574,11 @@ bool session_st::checkSendingDeadReqs()
 			unsendContPackets=reqContentPackets-sendConPackets;
 			if(unsendContPackets<500)
 			{
+				isHighPressure=false;
 				return false;
+			}else if(unsendContPackets>1000)
+			{
+				isHighPressure=true;
 			}
 			if(lastRespPacketSize<DEFAULT_RESPONSE_MTU)
 			{
@@ -1433,8 +1437,11 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 			{
 				if(isStopSendReservedPacks)
 				{
-					lastRespPacketSize=tot_len;
-					return;
+					if(!isHighPressure)
+					{
+						lastRespPacketSize=tot_len;
+						return;
+					}
 				}
 				selectiveLogInfo(LOG_DEBUG,"receive from backend");
 				if(isWaitResponse||isGreetReceivedPacket)
