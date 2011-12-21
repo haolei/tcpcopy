@@ -47,7 +47,7 @@ static uint64_t packetsPutNum=0;
 static bool isReadCompletely=true;
 
 /*if true,then tcpcopy mysql request replication*/
-bool isMySqlCopy=false;
+bool isMySqlCopy=true;
 
 /**
  * put one packet to buffered pool

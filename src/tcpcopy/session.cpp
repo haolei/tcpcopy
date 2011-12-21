@@ -569,7 +569,7 @@ bool session_st::checkSendingDeadReqs()
 	size_t unsendContPackets=0;
 	if(diff < 2)
 	{
-		if(reqContentPackets>sendConPackets)
+		if(reqContentPackets>=sendConPackets)
 		{
 			unsendContPackets=reqContentPackets-sendConPackets;
 			if(unsendContPackets<500)
@@ -591,8 +591,9 @@ bool session_st::checkSendingDeadReqs()
 	{
 		if(unsendContPackets>0)
 		{
-			selectiveLogInfo(LOG_WARN,"reqs to back:%u,psize=%u,unsend:%u",
-					client_port,lastRespPacketSize,unsendContPackets);
+			selectiveLogInfo(LOG_WARN,"to back:%u,size=%u,send:%u,totCRq=%u",
+					client_port,lastRespPacketSize,sendConPackets,
+					reqContentPackets);
 		}else
 		{
 			selectiveLogInfo(LOG_NOTICE,"reqs to back:%u,psize=%u",
