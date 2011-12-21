@@ -569,22 +569,22 @@ bool session_st::checkSendingDeadReqs()
 	size_t unsendContPackets=0;
 	if(diff < 2)
 	{
-		if(lastRespPacketSize>DEFAULT_RESPONSE_MTU)
-		{
-			return false;
-		}
 		if(reqContentPackets>sendConPackets)
 		{
 			unsendContPackets=reqContentPackets-sendConPackets;
-			if(unsendContPackets<500)
+			if(unsendContPackets<200)
 			{
 				return false;
 			}
 		}
+		if(lastRespPacketSize>DEFAULT_RESPONSE_MTU)
+		{
+			return false;
+		}
 	}
 	if(isPartResponse)
 	{
-		if(unsendContPackets>=500)
+		if(unsendContPackets>=200)
 		{
 			selectiveLogInfo(LOG_WARN,"reqs to back:%u,psize=%u,unsend:%u",
 					client_port,lastRespPacketSize,unsendContPackets);
