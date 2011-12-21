@@ -582,8 +582,8 @@ bool session_st::checkSendingDeadReqs()
 	{
 		if(unsendContPackets>=100)
 		{
-			selectiveLogInfo(LOG_WARN,"send dead requests to back:%u",
-					client_port);
+			selectiveLogInfo(LOG_WARN,"send dead reqs to back:%u,psize=%u",
+					client_port,lastRespPacketSize);
 		}else
 		{
 			selectiveLogInfo(LOG_NOTICE,"send dead requests to back:%u",
