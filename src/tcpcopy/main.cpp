@@ -218,7 +218,11 @@ static int retrieve_raw_sockets(int sock)
 		if(isPacketNeeded((const char* )packet))
 		{
 			rawValidPackets++;
+#if (MULTI_THREADS)  
 			putPacketToPool((const char*)packet,length);
+#else
+			process(packet);
+#endif
 		}
 		count++;
 		if(rawPackets%10000==0)
@@ -244,7 +248,11 @@ static void dispose_event(int fd){
 		//it changes source port for this packet
 		(msg->tcp_header).source=remote_port;
 		//it is tricked as if from tested machine
+#if (MULTI_THREADS)  
 		putPacketToPool((const char*)msg,sizeof(receiver_msg_st));
+#else
+		process((char*)msg);
+#endif
 	}   
 }
 
@@ -283,12 +291,13 @@ static int init_tcp_copy()
 		select_sever_add(raw_sock);
 		//init sending info
 		send_init();
+#if (MULTI_THREADS)  
 		pthread_t thread;
 		pthread_mutex_init(&mutex,NULL);
 		pthread_cond_init(&full,NULL);
 		pthread_cond_init(&empty,NULL);
 		pthread_create(&thread,NULL,dispose,NULL);
-
+#endif
 		//add a connection to the tested server for exchanging infomation
 		add_msg_connetion(local_port,remote_ip,remote_port);
 		logInfo(LOG_NOTICE,"add a tunnel for exchanging information:%u",
