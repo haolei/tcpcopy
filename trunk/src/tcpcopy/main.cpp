@@ -44,7 +44,6 @@ static uint64_t writeCounter=0;
 
 static int raw_sock;
 static uint64_t packetsPutNum=0;
-static bool isSingleTh=true;
 static bool isReadCompletely=true;
 
 /*if true,then tcpcopy mysql request replication*/
@@ -219,14 +218,7 @@ static int retrieve_raw_sockets(int sock)
 		if(isPacketNeeded((const char* )packet))
 		{
 			rawValidPackets++;
-			//putPacketToPool((const char*)packet,length);
-			if(isSingleTh)
-			{
-				process(packet);
-			}else
-			{
-				putPacketToPool((const char*)packet,length);
-			}
+			putPacketToPool((const char*)packet,length);
 		}
 		count++;
 		if(rawPackets%10000==0)
@@ -252,13 +244,7 @@ static void dispose_event(int fd){
 		//it changes source port for this packet
 		(msg->tcp_header).source=remote_port;
 		//it is tricked as if from tested machine
-		if(isSingleTh)
-		{
-			process((char*)msg);
-		}else
-		{
-			putPacketToPool((const char*)msg,sizeof(receiver_msg_st));
-		}
+		putPacketToPool((const char*)msg,sizeof(receiver_msg_st));
 	}   
 }
 
@@ -297,14 +283,11 @@ static int init_tcp_copy()
 		select_sever_add(raw_sock);
 		//init sending info
 		send_init();
-		if(!isSingleTh)
-		{
-			pthread_t thread;
-			pthread_mutex_init(&mutex,NULL);
-			pthread_cond_init(&full,NULL);
-			pthread_cond_init(&empty,NULL);
-			pthread_create(&thread,NULL,dispose,NULL);
-		}
+		pthread_t thread;
+		pthread_mutex_init(&mutex,NULL);
+		pthread_cond_init(&full,NULL);
+		pthread_cond_init(&empty,NULL);
+		pthread_create(&thread,NULL,dispose,NULL);
 
 		//add a connection to the tested server for exchanging infomation
 		add_msg_connetion(local_port,remote_ip,remote_port);
