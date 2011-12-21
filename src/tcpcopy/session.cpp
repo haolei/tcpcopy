@@ -569,10 +569,14 @@ bool session_st::checkSendingDeadReqs()
 	size_t unsendContPackets=0;
 	if(diff < 2)
 	{
+		if(lastRespPacketSize>DEFAULT_RESPONSE_MTU)
+		{
+			return false;
+		}
 		if(reqContentPackets>sendConPackets)
 		{
 			unsendContPackets=reqContentPackets-sendConPackets;
-			if(unsendContPackets<100)
+			if(unsendContPackets<500)
 			{
 				return false;
 			}
@@ -580,14 +584,14 @@ bool session_st::checkSendingDeadReqs()
 	}
 	if(isPartResponse)
 	{
-		if(unsendContPackets>=100)
+		if(unsendContPackets>=500)
 		{
-			selectiveLogInfo(LOG_WARN,"send dead reqs to back:%u,psize=%u",
-					client_port,lastRespPacketSize);
+			selectiveLogInfo(LOG_WARN,"reqs to back:%u,psize=%u,unsend:%u",
+					client_port,lastRespPacketSize,unsendContPackets);
 		}else
 		{
-			selectiveLogInfo(LOG_NOTICE,"send dead requests to back:%u",
-					client_port);
+			selectiveLogInfo(LOG_NOTICE,"reqs to back:%u,psize=%u",
+					client_port,lastRespPacketSize);
 		}
 		isWaitResponse=false;
 		isPartResponse=false;
