@@ -102,6 +102,7 @@ struct session_st
 	bool    hasPrepareStat;
 	bool    isExcuteForTheFirstTime;
 	bool    needContinueProcessingForBakAck;
+	bool    isHighPressure;
 
 	uint32_t lastAckFromResponse;
 	uint32_t lastSeqFromResponse;
@@ -204,6 +205,7 @@ struct session_st
 		hasPrepareStat=false;
 		isExcuteForTheFirstTime=true;
 		needContinueProcessingForBakAck=false;
+		isHighPressure=false;
 		virtual_status = SYN_SEND;
 		reset_flag = false;
 		over_flag = false;
