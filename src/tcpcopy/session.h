@@ -38,7 +38,6 @@ void outputPacketForDebug(int level,int flag,struct iphdr *ip_header,
 typedef std::list<unsigned char *> dataContainer;
 typedef std::list<unsigned char *>::iterator dataIterator;
 
-
 #define SYN_SEND     1
 #define SYN_CONFIRM  2
 #define SEND_REQUEST 4
@@ -236,11 +235,6 @@ struct session_st
 		lastRecvRespContentTime=lastUpdateTime;
 		lastRecvClientContentTime=lastUpdateTime;
 
-		if(unsend.size()>5)
-		{
-			logInfo(LOG_NOTICE,"reinit unsend number:%u,port=%u",
-					unsend.size(),client_port);                                                                 
-		}
 		client_port=0;
 		
 		for(dataIterator iter=unsend.begin();iter!=unsend.end();)
@@ -263,12 +257,6 @@ struct session_st
 
 	~session_st()
 	{
-		if(unsend.size()>5)
-		{
-			logInfo(LOG_NOTICE,"erase unsend number:%u,port=%u",
-					unsend.size(),client_port);                                                                 
-		}
-
 		for(dataIterator iter=unsend.begin();iter!=unsend.end();)
 		{
 			free(*(iter++));

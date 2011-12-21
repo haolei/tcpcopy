@@ -59,13 +59,12 @@ uint32_t send_ip_packet(struct iphdr* ip_header,uint16_t tot_len)
 	//is returned. On the other hand, normal raw socket frag
 	//if tot_len is more than 1500,it will fail
 	int send_len=0;
-	if(sock>0)
+	if(sock > 0)
 	{
 		send_len = sendto(sock,(char *)ip_header,tot_len,0,
 				(struct sockaddr *)&toaddr,sizeof(toaddr));
 		if(send_len == -1)
 		{
-			logInfo(LOG_ERR,"sock is:%u",sock);
 			perror("send to");
 		}
 	}
