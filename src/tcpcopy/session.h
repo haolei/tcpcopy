@@ -16,7 +16,6 @@ typedef struct virtual_ip_addr{
 	int num;
 }virtual_ip_addr;
 
-extern bool isMySqlCopy;
 extern uint32_t sample_ip;
 extern virtual_ip_addr local_ips;
 extern uint16_t local_port;
