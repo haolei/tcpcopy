@@ -1351,11 +1351,13 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 			return;
 		}
 		uint32_t diff=nextSeq-ack;
-		if(diff > 4096)
+		if(diff > 8192)
 		{
 			if(contSize>0)
 			{
-				selectiveLogInfo(LOG_WARN,"ack is too small,wait");
+				selectiveLogInfo(LOG_WARN,"ack is too small,wait:%u",
+						client_port);
+				sendFakedAckToBackend(ip_header,tcp_header);
 				needContinueProcessingForBakAck=1;
 				lastRespPacketSize=tot_len;
 				return;
@@ -1457,7 +1459,10 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 			return;
 		}else
 		{
-			 sendFakedAckToBackend(ip_header,tcp_header);
+			if(contSize>0)
+			{
+				sendFakedAckToBackend(ip_header,tcp_header);
+			}
 		}
 
 		if(!candidateErased)
