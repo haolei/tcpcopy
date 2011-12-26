@@ -33,6 +33,7 @@
 #define MAX_ADDR 67106816
 #define SUCCESS 0
 #define FAILURE -1
+#define MULTI_THREADS 1
 #define MEMORY_USAGE "VmRSS:"
 
 static pthread_mutex_t mutex;
