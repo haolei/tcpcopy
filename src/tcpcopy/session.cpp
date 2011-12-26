@@ -10,7 +10,8 @@
 
 using std::map;
 
-#define DEBUG_TCPCOPY 1
+//#define DEBUG_TCPCOPY 1
+#define TCPCOPY_MYSQL 1
 
 uint32_t localhost_ip;
 uint32_t sample_ip;
@@ -971,7 +972,7 @@ void session_st::sendFakedAckToBackend(struct iphdr* ip_header,
 	tcp_header2->source = tcp_header->dest;
 	tcp_header2->ack=1;
 	tcp_header2->ack_seq = virtual_next_sequence;
-	tcp_header2->seq = tcp_header->ack_seq;
+	tcp_header2->seq =htonl(nextSeq);
 	tcp_header2->window= 65535;
 #if (DEBUG_TCPCOPY)
 	selectiveLogInfo(LOG_INFO,"send faked ack to backend,client win:%u",
