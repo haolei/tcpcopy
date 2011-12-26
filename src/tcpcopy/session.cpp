@@ -50,7 +50,6 @@ static double bakTotalTimes=0;
 static uint64_t clientTotal=0;
 static double clientTotalTimes=0;
 static uint64_t sendPackets=0;
-static double sendTotalIntervalTimes=0;
 
 /**
  * output packet info for debug
@@ -481,18 +480,6 @@ uint32_t session_st::wrap_send_ip_packet(uint64_t fake_ip_addr,
 #if (DEBUG_TCPCOPY)
 	outputPacket(LOG_DEBUG,SERVER_BACKEND_FLAG,ip_header,tcp_header);
 #endif
-	struct timeval cur=getTime();
-	if(sendConPackets>100)
-	{
-		sendTotalIntervalTimes+=cur.tv_sec-lastSendContentTime.tv_sec;
-		double interval=(cur.tv_usec-lastSendContentTime.tv_usec)/1000000.0;
-		sendTotalIntervalTimes+=interval;
-		if(interval>0.0005)
-		{
-			selectiveLogInfo(LOG_NOTICE,"interval:%f",interval);
-		}
-	}
-	lastSendContentTime=cur;
 	sendPackets++;
 	uint32_t sendLen=send_ip_packet(ip_header,tot_len);
 	if(-1==sendLen)
@@ -560,6 +547,7 @@ int session_st::sendReservedLostPackets()
 				}else
 				{
 					isWaitResponse=1;
+					isPartResponse=0;
 					isResponseCompletely=0;
 				}
 #if (DEBUG_TCPCOPY)
@@ -601,20 +589,55 @@ int session_st::sendReservedLostPackets()
  */
 bool session_st::checkSendingDeadReqs()
 {
-#if (DEBUG_TCPCOPY) 
-	selectiveLogInfo(LOG_DEBUG,"check port:%u,sent=%u,tot co reqs:%u",
-			client_port,sendConPackets,reqContentPackets);
-#endif
 	time_t now=time(0);
 	int diff=now-lastRecvRespContentTime;
+	size_t unsendContPackets=0;
 	if(diff < 2)
 	{
-		return false;
-	}else if(diff >30)
-	{
-		selectiveLogInfo(LOG_WARN,"long time for not recving resp from back");
+		if(reqContentPackets>=sendConPackets)
+		{
+			unsendContPackets=reqContentPackets-sendConPackets;
+			if(unsendContPackets<5)
+			{
+#if (DEBUG_TCPCOPY) 
+				selectiveLogInfo(LOG_DEBUG,"f port:%u,sent=%u,tot co reqs:%u",
+					client_port,sendConPackets,reqContentPackets);
+#endif
+				isHighPressure=0;
+				return false;
+			}else 
+			{
+				isHighPressure=1;
+			}
+			if(lastRespPacketSize<DEFAULT_RESPONSE_MTU)
+			{
+				return false;
+			}
+		}else
+		{
+			return false;
+		}
 	}
-	return true;
+	if(isPartResponse)
+	{
+		if(unsendContPackets>0)
+		{
+			selectiveLogInfo(LOG_WARN,"to back:%u,size=%u,send:%u,totCRq=%u",
+					client_port,lastRespPacketSize,sendConPackets,
+					reqContentPackets);
+		}else
+		{
+#if (DEBUG_TCPCOPY)
+			selectiveLogInfo(LOG_NOTICE,"reqs to back:%u,psize=%u",
+					client_port,lastRespPacketSize);
+#endif
+		}
+		isWaitResponse=0;
+		isPartResponse=0;
+		isResponseCompletely=0;
+		return true;
+	}
+	return false;
 }
 
 /**
@@ -657,7 +680,7 @@ int session_st::sendReservedPackets()
 	uint32_t curAck=0;
 #if (DEBUG_TCPCOPY)
 	selectiveLogInfo(LOG_DEBUG,"sendResPas port:%u,sent=%u,tot co reqs:%u",
-			client_port,sendConPackets,reqContentPackets);
+	client_port,sendConPackets,reqContentPackets);
 	selectiveLogInfo(LOG_DEBUG,"send reserved packets,port:%u",client_port);
 #endif
 	while(! unsend.empty()&&!needPause)
@@ -694,6 +717,7 @@ int session_st::sendReservedPackets()
 #endif
 			mayPause=1;
 			isWaitResponse=1;
+			isPartResponse=0;
 			isResponseCompletely=0;
 			isRequestBegin=1;
 			isRequestComletely=0;
@@ -972,7 +996,8 @@ void session_st::sendFakedAckToBackend(struct iphdr* ip_header,
 	tcp_header2->source = tcp_header->dest;
 	tcp_header2->ack=1;
 	tcp_header2->ack_seq = virtual_next_sequence;
-	tcp_header2->seq =htonl(nextSeq);
+	tcp_header2->seq = htonl(nextSeq);
+	//tcp_header2->seq = tcp_header->ack_seq;
 	tcp_header2->window= 65535;
 #if (DEBUG_TCPCOPY)
 	selectiveLogInfo(LOG_INFO,"send faked ack to backend,client win:%u",
@@ -1327,6 +1352,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 	uint32_t size_tcp = tcp_header->doff<<2;
 	uint32_t contSize=tot_len-size_tcp-size_ip;
 	time_t current=time(0);
+	bool isStopSendReservedPacks=0;
 
 	if(contSize>0)
 	{
@@ -1350,19 +1376,13 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 			sendFakedFinToBackend(ip_header,tcp_header);
 			return;
 		}
-		uint32_t diff=nextSeq-ack;
-		if(diff > 8192)
+		if(contSize>0)
 		{
-			if(contSize>0)
-			{
-				selectiveLogInfo(LOG_WARN,"ack is too small,wait:%u",
-						client_port);
-				sendFakedAckToBackend(ip_header,tcp_header);
-				needContinueProcessingForBakAck=1;
-				lastRespPacketSize=tot_len;
-				return;
-			}
+			//needContinueProcessingForBakAck=1;
 		}
+		//lastRespPacketSize=tot_len;
+		
+		//return;
 	}
 
 	if( tcp_header->syn)
@@ -1457,12 +1477,6 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 		{
 			sendFakedFinToBackend(ip_header,tcp_header);
 			return;
-		}else
-		{
-			if(contSize>0)
-			{
-				sendFakedAckToBackend(ip_header,tcp_header);
-			}
 		}
 
 		if(!candidateErased)
@@ -1477,12 +1491,53 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 				isGreetReceivedPacket=1;
 			}
 #endif
+			isPartResponse=1;
+
+			if(tot_len>mtu)
 			{
+				isMtuModifed=1;
+				mtu=tot_len;
+#if (DEBUG_TCPCOPY)
+				selectiveLogInfo(LOG_NOTICE,"cur mtu:%u,port:%u",
+						mtu,client_port);
+#endif
+			}
+#if (TCPCOPY_MYSQL)
+			if(tot_len>=DEFAULT_RESPONSE_MTU)
+			{
+				isStopSendReservedPacks=1;
+			}
+#else
+			if(tot_len==DEFAULT_RESPONSE_MTU)
+			{
+				isStopSendReservedPacks=1;
+			}
+#endif
+			if(!isStopSendReservedPacks&&!isMtuModifed&&tot_len==mtu)
+			{
+				if(lastRespPacketSize==tot_len)
+				{
+					isStopSendReservedPacks=1;
+				}
+			}
+			{
+				/*if(isStopSendReservedPacks)
+				{
+					if(!isHighPressure)
+					{
+						lastRespPacketSize=tot_len;
+						return;
+					}
+				}*/
 #if (DEBUG_TCPCOPY)
 				selectiveLogInfo(LOG_DEBUG,"receive from backend");
 #endif
 				if(isWaitResponse||isGreetReceivedPacket)
 				{
+					if(contSize>0)
+					{
+						sendFakedAckToBackend(ip_header,tcp_header);
+					}
 #if (DEBUG_TCPCOPY)
 					selectiveLogInfo(LOG_DEBUG,"receive back server's resp");
 #endif
@@ -1986,6 +2041,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 						sendReservedLostPackets();
 						isWaitResponse=1;
 						isResponseCompletely=0;
+						isPartResponse=0;
 						return;
 					}
 				}
@@ -2052,6 +2108,7 @@ void session_st::process_recv(struct iphdr *ip_header,
 				if(SEND_REQUEST==virtual_status)
 				{
 					isWaitResponse=1;
+					isPartResponse=0;
 					isResponseCompletely=0;
 				}
 				if(!isResponseCompletely)
@@ -2134,11 +2191,7 @@ void process(char *packet)
 		}
 		logInfo(LOG_WARN,"clientTotal:%llu,clientTotalTimes:%f,avg=%f",
 				clientTotal,clientTotalTimes,clientTotalTimes/clientTotal);
-		if(sendPackets>0)
-		{
-			logInfo(LOG_WARN,"send Packets:%llu,avg=%f",sendPackets,
-					sendTotalIntervalTimes/sendPackets);
-		}
+		logInfo(LOG_WARN,"send Packets:%llu",sendPackets);
 		clearTimeoutTcpSessions();
 		double ratio=0;
 		if(enterCount>0)

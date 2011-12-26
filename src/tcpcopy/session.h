@@ -93,7 +93,6 @@ struct session_st
 	time_t createTime;
 	time_t lastRecvRespContentTime;
 	time_t lastRecvClientContentTime;
-	struct timeval lastSendContentTime;
 	uint16_t virtual_status;
 	uint16_t client_ip_id;
 	uint16_t client_port;
@@ -104,6 +103,7 @@ struct session_st
 	unsigned isClientClosed:1;
 	unsigned isTestConnClosed:1;
 	unsigned isWaitResponse:1;
+	unsigned isPartResponse:1;
 	unsigned isResponseCompletely:1;
 	unsigned isTrueWaitResponse:1;
 	unsigned isWaitPreviousPacket:1;
@@ -127,6 +127,7 @@ struct session_st
 	unsigned hasPrepareStat:1;
 	unsigned isExcuteForTheFirstTime:1;
 	unsigned needContinueProcessingForBakAck:1;
+	unsigned isHighPressure:1;
 
 	int generateRandomNumber(int min,int max,unsigned int* seed)
 	{
@@ -202,6 +203,7 @@ struct session_st
 		hasPrepareStat=0;
 		isExcuteForTheFirstTime=true;
 		needContinueProcessingForBakAck=0;
+		isHighPressure=0;
 		virtual_status = SYN_SEND;
 		reset_flag = 0;
 		over_flag = 0;
@@ -209,6 +211,7 @@ struct session_st
 		isClientClosed=0;
 		isKeepalive=0;
 		isWaitResponse=0;
+		isPartResponse=0;
 		isResponseCompletely=0;
 		isRequestComletely=true;
 		isRequestBegin=0;
@@ -231,6 +234,7 @@ struct session_st
 		createTime=lastUpdateTime;
 		lastRecvRespContentTime=lastUpdateTime;
 		lastRecvClientContentTime=lastUpdateTime;
+
 		client_port=0;
 		
 		for(dataIterator iter=unsend.begin();iter!=unsend.end();)
