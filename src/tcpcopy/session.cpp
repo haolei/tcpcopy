@@ -1381,13 +1381,13 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 			sendFakedFinToBackend(ip_header,tcp_header);
 			return;
 		}
-		if(contSize>0)
+		/*if(contSize>0)
 		{
-			//needContinueProcessingForBakAck=1;
+			needContinueProcessingForBakAck=1;
 		}
-		//lastRespPacketSize=tot_len;
+		lastRespPacketSize=tot_len;
 		
-		//return;
+		return;*/
 	}
 
 	if( tcp_header->syn)
