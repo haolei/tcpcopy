@@ -301,7 +301,7 @@ struct session_st
 	void sendFakedSynAckToBackend(struct iphdr* ip_header,
 			struct tcphdr* tcp_header);
 	void sendFakedAckToBackend(struct iphdr* ip_header,
-			struct tcphdr* tcp_header);
+			struct tcphdr* tcp_header,bool changeSeq);
 	void sendFakedFinToBackend(struct iphdr* ip_header,
 			struct tcphdr* tcp_header);
 	void sendFakedFinToBackByCliePack(struct iphdr* ip_header,

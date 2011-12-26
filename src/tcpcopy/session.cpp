@@ -978,7 +978,7 @@ void session_st::sendFakedSynAckToBackend(struct iphdr* ip_header,
  * send faked ack packet to backend 
  */
 void session_st::sendFakedAckToBackend(struct iphdr* ip_header,
-		struct tcphdr* tcp_header)
+		struct tcphdr* tcp_header,bool changeSeq)
 {
 	static unsigned char fake_ack_buf[40];
 	memset(fake_ack_buf,40,0);
@@ -996,8 +996,13 @@ void session_st::sendFakedAckToBackend(struct iphdr* ip_header,
 	tcp_header2->source = tcp_header->dest;
 	tcp_header2->ack=1;
 	tcp_header2->ack_seq = virtual_next_sequence;
-	tcp_header2->seq = htonl(nextSeq);
-	//tcp_header2->seq = tcp_header->ack_seq;
+	if(changeSeq)
+	{
+		tcp_header2->seq = htonl(nextSeq);
+	}else
+	{
+		tcp_header2->seq = tcp_header->ack_seq;
+	}
 	tcp_header2->window= 65535;
 #if (DEBUG_TCPCOPY)
 	selectiveLogInfo(LOG_INFO,"send faked ack to backend,client win:%u",
@@ -1431,7 +1436,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 		{
 			virtual_next_sequence = plus_1(tcp_header->seq);
 		}
-		sendFakedAckToBackend(ip_header,tcp_header);
+		sendFakedAckToBackend(ip_header,tcp_header,false);
 		if(!isClientClosed)
 		{
 			//send constructed server fin to the backend
@@ -1536,7 +1541,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 				{
 					if(contSize>0)
 					{
-						sendFakedAckToBackend(ip_header,tcp_header);
+						sendFakedAckToBackend(ip_header,tcp_header,true);
 					}
 #if (DEBUG_TCPCOPY)
 					selectiveLogInfo(LOG_DEBUG,"receive back server's resp");
