@@ -1454,6 +1454,9 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 		{
 			sendFakedFinToBackend(ip_header,tcp_header);
 			return;
+		}else
+		{
+			 sendFakedAckToBackend(ip_header,tcp_header);
 		}
 
 		if(!candidateErased)
