@@ -1362,7 +1362,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 		if(!isBackSynReceived)
 		{
 #if (DEBUG_TCPCOPY)
-			selectiveLogInfo(LOG_NOTICE,"not recv back syn,p=%u",,client_port);
+			selectiveLogInfo(LOG_NOTICE,"not recv back syn,p=%u",client_port);
 #endif
 			reset_flag = true;
 			return;
