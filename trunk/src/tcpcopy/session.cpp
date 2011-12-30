@@ -1368,6 +1368,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 #endif
 		if(!isBackSynReceived)
 		{
+			virtual_next_sequence =tcp_header->seq;;
 			sendFakedFinToBackend(ip_header,tcp_header);
 			isFakedSendingFinToBackend=1;
 			isClientClosed=1;
@@ -1478,6 +1479,7 @@ void session_st::update_virtual_status(struct iphdr *ip_header,
 	}
 	if(!isBackSynReceived)
 	{
+		virtual_next_sequence =tcp_header->seq;;
 		sendFakedFinToBackend(ip_header,tcp_header);
 		isFakedSendingFinToBackend=1;
 		isClientClosed=1;
