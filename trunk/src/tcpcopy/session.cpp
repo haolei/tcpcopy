@@ -123,8 +123,8 @@ static int clearTimeoutTcpSessions()
 	 * and long-lived sessions(one connection represents one session)
 	 */
 	time_t current=time(0);
-	time_t normalBase=current-60;
-	time_t keepaliveBase=current-1800;
+	time_t normalBase=current-30;
+	time_t keepaliveBase=current-60;
 	time_t tmpBase=0;
 	double ratio=100.0*enterCount/(totalRequests+1);
 	size_t MAXPACKETS=200;
