@@ -2,7 +2,7 @@
 {{{
 
 1、multiple ip addresses
-if you have multiple ip addresses,then you can use the following method to use tcpcopy:
+if you have multiple ip addresses,then you can use the following method:
 
 ./tcpcopy ip1:ip2:ip3:... port1 destIP destPort
 
