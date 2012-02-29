@@ -2458,8 +2458,8 @@ bool isPacketNeeded(const char *packet)
  */
 void process(char *packet)
 {
-	struct tcphdr *tcp_header;
-	struct iphdr *ip_header;
+	struct tcphdr *tcp_header=NULL;
+	struct iphdr *ip_header=NULL;
 	uint32_t size_ip;
 	bool reusePort=0;
 	time_t now=time(0);
