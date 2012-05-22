@@ -169,6 +169,7 @@ static void interception_process(int fd){
 				if(passed_ips.ips[i]==ip_header->daddr)
 				{
 					pass_through_flag=1;
+					break;
 				}
 			}
 			if(pass_through_flag)
