@@ -1,4 +1,3 @@
-#include <unistd.h>
 #include "msg.h"
 
 static int tcp_sock_init(){
